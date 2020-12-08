@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+User-agent: *
+Disallow: /topic
+User-agent: Bingbot
+User-agent: Googlebot
+User-agent: Slurp
+Disallow:
+Sitemap: https://addons.idrinth.de/topic/sitemap.xml

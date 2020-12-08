@@ -1,0 +1,36 @@
+Thanks for finding this file, I hope it helps seeing how much foreign work goes into making even a simple website.
+
+Björn Büttner
+    Creator of this site
+    https://twitter.com/idrinth
+    https://github.com/Idrinth
+
+/* THANKS */
+
+"Scriptiny Editorial"
+    Creator of the used WYSIWYG-Editor
+    http://www.scriptiny.com/
+
+Hilko Holweg
+    Creator of the original social share privacy
+    http://www.heise.de
+
+Sebastian Hilbig
+    Creator of the original social share privacy
+    http://www.heise.de
+
+Nicolas Heiringhoff
+    Creator of the original social share privacy
+    http://www.heise.de
+
+Juergen Schmidt
+    Creator of the original social share privacy
+    http://www.heise.de
+
+László Zsidi
+    GIFEncoder Version 2.0, used for the signatures
+    http://gifs.hu
+
+"Dana Bloodkiss"
+    Creator of the gif-Image used to create all signatures
+    https://www.facebook.com/dana.bloodkiss

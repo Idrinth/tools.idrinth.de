@@ -1,0 +1,71 @@
+@charset "UTF-8"
+/*
+Document : small.css
+Created on : 04.08.2012, 19:56:14
+Author : Björn "Idrinth" Büttner
+eMail : eldrim@gmx.de
+Description:
+This stylesheet creates mobile layouts for all pages of tools.idrinth.de
+*/
+@media only screen and (max-width:1000px) {
+    #sidebar-wrapper {
+        width:25%;
+    }
+    #content-wrapper {
+        width:75%;
+    }
+}
+@media only screen and (max-width:800px) {
+    #sidebar-wrapper {
+        width:33%;
+    }
+    .cols-3 .floating-col,
+    .cols-4 .floating-col {
+        width:45%;
+        padding: 0 2.5%;
+        float:left;
+    }
+    #content-wrapper {
+        width:67%;
+    }
+}
+@media only screen and (max-width:600px) {
+    #skip-links {
+        display: block;
+    }
+    .cols-2 .floating-col,
+    .cols-3 .floating-col,
+    .cols-4 .floating-col {
+        width:95%;
+        padding: 0 2.5%;
+        float:none;
+    }
+    #inner-body-wrapper {
+        margin:0;
+    }
+    #nav ul li,
+    #skip-links ul li {
+        display: block;
+        float:left;
+        padding: 5px 5%;
+        width: 40%;
+    }
+}
+@media only screen and (max-width:400px) {
+    #nav ul li,
+    #skip-links ul li {
+        float:none;
+        width: 90%;
+    }
+    .link-to-button {
+        width:100%;
+        font-size:100%;
+        margin: 1em 0;
+        text-align: center;
+    }
+    #sidebar-wrapper,
+    #content-wrapper {
+        width:100%;
+        padding: 0;
+    }
+}
