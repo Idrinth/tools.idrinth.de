@@ -18,8 +18,7 @@ $descriptions = array(
 if(empty($_SERVER['HTTP_HOST'])) {
     $_SERVER['HTTP_HOST'] = 'tools.idrinth.de';
 }
-$GLOBALS['db'] = new mysqli('localhost','tools','','tools');
-$GLOBALS['db']->set_charset('utf8');
+require_once __DIR__.'/config.php';
 require_once __DIR__ . '/classes/urlparser.php';
 $GLOBALS['parser'] = new urlparser($_SERVER['REQUEST_URI']);
 require_once __DIR__ . '/classes/user.php';
