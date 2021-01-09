@@ -1,6 +1,17 @@
 <?php
 $updates = array(
     1 => array(
+        17 => array(
+            0 => array(
+                'date' => 20170713,
+                'categories' => array(
+                    'addons',
+                ),
+                'descriptions' => array(
+                    'Filtering by tag is now implemented.',
+                ),
+            )
+        ),
         16 => array(
             1 => array(
                 'date' => 20170713,
