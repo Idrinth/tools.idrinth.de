@@ -269,7 +269,8 @@ class addons {
         $content = '';
         $res = $this->db->query("SELECT name,slug,curVersion,lastUpdate
             FROM addon
-            WHERE 1
+            WHERE active
+            ".(isset($_POST['tag']) && $_POST['tag']!=0 && is_numeric($_POST['tag']) ? "AND id IN (SELECT addon FROM addon_tag WHERE tag=".$_POST['tag'].")" : "")."
         " . (isset($_POST['search']) && strlen($_POST['search']) > 0?"AND lower(addon.name) LIKE '%" . $this->db->real_escape_string(mb_strtolower($_POST['search'])) . "%'":'') . "
         ORDER BY " . (isset($_GET['s']) && $_GET['s'] == 'n'?"name ASC,lastUpdate DESC":"lastUpdate DESC,name ASC"));
         if($res) {
@@ -277,7 +278,15 @@ class addons {
                 $content .= '<tr><td><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></td><td>' . $item['curVersion'] . '</td><td>' . date('r',$item['lastUpdate']) . '</td></tr>';
             }
         }
-        return '<div style="width:100%;height:auto;overflow:hidden;"><a style="display:block;float:left;" href="https://github.com/Idrinth/WARAddonClient/releases/latest" taget="_blank">Client</a><a style="display:block;float:right;" title="Add new Addon" href="/addons/new/">+</a></div><form method="post"><fieldset><legend>Filter Addons</legend><div><label for="name">Name similar to</label><input type="text" name="search" value="' . $_POST['search'] . '" id="name"/></div></fieldset><button type="submit">Filter Addons</button></form><table><thead><tr><th>Name</th><th>Version</th><th>Updated</th></tr></thead><tbody>' . $content . '</tbody></table>';
+        $options = '<option value="0">Any</option>';
+        $res = $this->db->query("SELECT * FROM tag ORDER BY name ASC");
+        while ($res && $tag = $res->fetch_assoc()) {
+            $options .= '<option value="'.$tag['aid'].'"'.(isset($_POST['tag']) && $tag['aid'] == $_POST['tag'] ? ' selected' : '').'>'.$tag['name'].'</tag>';
+        }
+        return '<div style="width:100%;height:auto;overflow:hidden"><a style="display:block;float:left;background:rgba(0,0,0,0.2);border-radius:3px" href="https://github.com/Idrinth/WARAddonClient/releases/latest" taget="_blank">Client</a><a style="display:block;float:right;background:rgba(0,0,0,0.2);border-radius:3px" title="Add new Addon" href="/addons/new/">+</a></div><form method="post"><fieldset><legend>Filter Addons</legend>
+        <div><label for="name">Name similar to</label><input type="text" name="search" value="' . $_POST['search'] . '" id="name"/></div>
+        <div><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>
+        </fieldset><button type="submit">Filter Addons</button></form><table><thead><tr><th>Name</th><th>Version</th><th>Updated</th></tr></thead><tbody>' . $content . '</tbody></table>';
     }
     function uploadFile($addon) {
         if(!$this->user->isActive()) {
