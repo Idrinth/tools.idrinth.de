@@ -1,6 +1,17 @@
 <?php
 $updates = array(
     1 => array(
+        18 => array(
+            0 => array(
+                'date' => 20210110,
+                'categories' => array(
+                    'addons',
+                ),
+                'descriptions' => array(
+                    'Addons can be endorsed.',
+                ),
+            )
+        ),
         17 => array(
             0 => array(
                 'date' => 20210109,
@@ -9,6 +20,7 @@ $updates = array(
                 ),
                 'descriptions' => array(
                     'Filtering by tag is now implemented.',
+                    'Download numbers are now shared.',
                 ),
             )
         ),
