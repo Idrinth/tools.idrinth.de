@@ -93,16 +93,31 @@ class addons {
         }
         $content = '<h3>Description</h3><ul style="overflow:hidden;height:auto;width:100%;margin:0;padding:0;">';
         $content .= '<p>' . $tags . '</p></ul>' . $this->makeDescriptions($addon);
-        $content .= '<table><thead><tr><th>Version</th><th>Status</th><!--<th>Works</th>--><th>Changes</th><th>Uploader</th></tr></thead><tbody>';
-        $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display FROM version LEFT JOIN user ON user.id=version.author WHERE addon=" . $addon['id'] . " ORDER BY main DESC,sub DESC, bug DESC");
+        if (isset($_POST['endorsement']) && $this->user->isActive()) {
+            $this->db->query("INSERT INTO endorsement (user, addon, endorsed) VALUES (".$this->user->id.",".$addon['id'].",".(intval($_POST['endorsement'])?1:0).") ON DUPLICATE KEY UPDATE endorsed=".(intval($_POST['endorsement'])?1:0));
+        }
+        $res = $this->db->query("SELECT endorsed FROM endorsement WHERE user=".$this->user->id." AND addon=".$addon['id']);
+        if ($res && $res->fetch_assoc()['endorsed']) {
+            $content .= '<form method="POST"><button type="submit" value="0" name="endorsement">UNENDORSE</button></form>';
+        } else {
+            $content .= '<form method="POST"><button type="submit" value="1" name="endorsement">ENDORSE</button></form>';
+        }
+        $content .= '<table><thead><tr><th>Version</th><th>Status</th><th>Changes</th><th>Uploader</th><th>Downloads</th></tr></thead><tbody>';
+        $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(*) as downloads
+FROM version
+INNER JOIN user ON user.id=version.author
+LEFT JOIN download ON download.version=version.id
+WHERE version.addon=".$addon['id']."
+GROUP BY version.id
+ORDER BY main DESC,sub DESC, bug DESC");
         if($res) {
             while($item = $res->fetch_assoc()) {
                 $content .= '<tr>'
                         . '<td><a rel="nofollow" href="addons/' . $addon['slug'] . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '</a></td>'
                         . '<td>' . self::$status['stability'][$item['status']] . '</td>'
-                        #. '<td>'.self::$status['use'][intval($item['use'])].'</td>'
                         . '<td style="max-height:3em;overflow-y:scroll;">' . $item['change'] . '</td>'
                         . '<td>' . $item['display'] . '</td>'
+                        . '<td style="max-height:3em;overflow-y:scroll;">' . $item['downloads'] . '</td>'
                         . '</tr>';
             }
             $res->free();
@@ -267,26 +282,29 @@ class addons {
     }
     function getOverview() {
         $content = '';
-        $res = $this->db->query("SELECT name,slug,curVersion,lastUpdate
+        $res = $this->db->query("SELECT addon.id,name,slug,curVersion,lastUpdate, COUNT(*) as downloads
             FROM addon
+            LEFT JOIN download on download.addon=addon.id
             WHERE active
-            ".(isset($_POST['tag']) && $_POST['tag']!=0 && is_numeric($_POST['tag']) ? "AND id IN (SELECT addon FROM addon_tag WHERE tag=".$_POST['tag'].")" : "")."
+            ".(isset($_POST['tag']) && $_POST['tag']!=0 && is_numeric($_POST['tag']) ? "AND addon.id IN (SELECT addon FROM addon_tag WHERE tag=".$_POST['tag'].")" : "")."
         " . (isset($_POST['search']) && strlen($_POST['search']) > 0?"AND lower(addon.name) LIKE '%" . $this->db->real_escape_string(mb_strtolower($_POST['search'])) . "%'":'') . "
-        ORDER BY " . (isset($_GET['s']) && $_GET['s'] == 'n'?"name ASC,lastUpdate DESC":"lastUpdate DESC,name ASC"));
+        GROUP BY addon.id
+        ORDER BY lastUpdate DESC,name ASC");
         if($res) {
             while($item = $res->fetch_assoc()) {
-                $content .= '<tr><td><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></td><td>' . $item['curVersion'] . '</td><td>' . date('r',$item['lastUpdate']) . '</td></tr>';
+                $item['endorsements'] = (int) $this->db->query("SELECT SUM(endorsed) FROM endorsement WHERE addon=".$item['id'])->fetch_row()[0];
+                $content .= '<tr><td><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></td><td>' . $item['curVersion'] . '</td><td>' . date('r',$item['lastUpdate']) . '</td><td>' . number_format($item['downloads']) . '</td><td>' . number_format($item['endorsements']) . '</td></tr>';
             }
         }
         $options = '<option value="0">Any</option>';
-        $res = $this->db->query("SELECT * FROM tag ORDER BY name ASC");
+        $res = $this->db->query("SELECT tag.*, COUNT(addon_tag.addon) as addons FROM tag INNER JOIN addon_tag ON addon_tag.tag=tag.aid GROUP BY tag.aid ORDER BY name ASC");
         while ($res && $tag = $res->fetch_assoc()) {
-            $options .= '<option value="'.$tag['aid'].'"'.(isset($_POST['tag']) && $tag['aid'] == $_POST['tag'] ? ' selected' : '').'>'.$tag['name'].'</tag>';
+            $options .= '<option value="'.$tag['aid'].'"'.(isset($_POST['tag']) && $tag['aid'] == $_POST['tag'] ? ' selected' : '').'>'.$tag['name'].' ('.$tag['addons'].')</tag>';
         }
         return '<div style="width:100%;height:auto;overflow:hidden"><a style="display:block;float:left;background:rgba(0,0,0,0.2);border-radius:3px" href="https://github.com/Idrinth/WARAddonClient/releases/latest" taget="_blank">Client</a><a style="display:block;float:right;background:rgba(0,0,0,0.2);border-radius:3px" title="Add new Addon" href="/addons/new/">+</a></div><form method="post"><fieldset><legend>Filter Addons</legend>
         <div><label for="name">Name similar to</label><input type="text" name="search" value="' . $_POST['search'] . '" id="name"/></div>
         <div><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>
-        </fieldset><button type="submit">Filter Addons</button></form><table><thead><tr><th>Name</th><th>Version</th><th>Updated</th></tr></thead><tbody>' . $content . '</tbody></table>';
+        </fieldset><button type="submit">Filter Addons</button></form><table><thead><tr><th>Name</th><th>Version</th><th>Updated</th><th>Downloads</th><th>Endorsements</th></tr></thead><tbody>' . $content . '</tbody></table>';
     }
     function uploadFile($addon) {
         if(!$this->user->isActive()) {
