@@ -1,6 +1,17 @@
 <?php
 $updates = array(
     1 => array(
+        19 => array(
+            0 => array(
+                'date' => 20210113,
+                'categories' => array(
+                    'addons',
+                ),
+                'descriptions' => array(
+                    'Addon-list can now be sorted by left-clicking the headers.',
+                ),
+            )
+        ),
         18 => array(
             0 => array(
                 'date' => 20210110,

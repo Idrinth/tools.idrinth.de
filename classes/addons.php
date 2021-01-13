@@ -304,7 +304,8 @@ ORDER BY main DESC,sub DESC, bug DESC");
         return '<div style="width:100%;height:auto;overflow:hidden"><a style="display:block;float:left;background:rgba(0,0,0,0.2);border-radius:3px" href="https://github.com/Idrinth/WARAddonClient/releases/latest" taget="_blank">Client</a><a style="display:block;float:right;background:rgba(0,0,0,0.2);border-radius:3px" title="Add new Addon" href="/addons/new/">+</a></div><form method="post"><fieldset><legend>Filter Addons</legend>
         <div><label for="name">Name similar to</label><input type="text" name="search" value="' . $_POST['search'] . '" id="name"/></div>
         <div><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>
-        </fieldset><button type="submit">Filter Addons</button></form><table><thead><tr><th>Name</th><th>Version</th><th>Updated</th><th>Downloads</th><th>Endorsements</th></tr></thead><tbody>' . $content . '</tbody></table>';
+        </fieldset><button type="submit">Filter Addons</button></form>
+        <table class="sorttable sortable"><thead><tr><th>Name</th><th>Version</th><th>Updated</th><th>Downloads</th><th>Endorsements</th></tr></thead><tbody>' . $content . '</tbody></table>';
     }
     function uploadFile($addon) {
         if(!$this->user->isActive()) {

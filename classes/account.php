@@ -212,7 +212,8 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         }
         if(count($_POST) > 0 && $_POST['login'] && $_POST['email'] && $_POST['display'] && $_POST['password'][1] && $_POST['password'][1] = $_POST['password'][0] && $_POST['password'][0]) {
             if($this->makeUser()) {
-                return '<p>An eMail was send to the adress given. You\'ll need to activate your account with the link given within.</p>';
+                return '<p>An eMail was send to the adress given. You\'ll need to activate your account with the link given within.</p><br /><br />'
+                . '<p>If you don\'t get an email within half an hour, please notify me on discord or the ror-forum, then I\'ll manually activate the account.</p>';
             }
         }
         return '<form method="post">'
