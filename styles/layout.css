@@ -42,12 +42,7 @@ textarea {
  border-radius: 2px 2px 2px 2px;
  width: 90%;
 }
-#inner-body-wrapper {
- max-width: 1200px;
- min-width: 200px;
- width:100%;
- margin: 10px auto 10px auto;
-}
+
 .cols-2 .floating-col {
  width: 45%;
  padding: 0 2.5%;
@@ -63,6 +58,11 @@ textarea {
  padding: 0 1.5%;
  float:left
 }
+
+
+
+
+/* Account and AbilityChain stuff to do with .wrapper class, would be ideal to replace with something else */
 .wrapper input,
 .wrapper select{
  width: 35%;
@@ -118,6 +118,11 @@ textarea {
  width: 35%;
  margin: 0 3%;
 }
+
+
+
+
+
 /**
 * Design
 **/
@@ -134,37 +139,23 @@ body {
 #skip-links {
  display:none;
 }
-#header-wrapper{
- padding: 10px 5px;
- background-color:#111111;
- color:#ffffff;
- border-radius: 3px 3px 0px 0px;
- background-image: -webkit-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-webkit-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
- background-image: -moz-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-moz-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
- background-image: -ms-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-ms-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
- background-image: -o-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-o-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
- background-image: linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075))
+
+main {
+  background-color: #ffffff;
+  display: flex;
 }
-#center-area {
- background-color:#ffffff;
- color:#111111
-}
-#content-wrapper {
- width:80%;
- float:left
-}
-#sidebar-wrapper {
- width: 20%;
- float:right
-}
+
 #sidebar {
  padding: var(--layout-spacing);
  font-size:90%;
+ flex: 1 1 100px;
 }
 #content {
  padding: var(--layout-spacing);
  border-right: #111111;
  position: relative;
+ color:#111111;
+ flex: 4 1 400px;
 }
 
 #content > form:first-of-type {
@@ -176,8 +167,7 @@ body {
 #content > ul:first-of-type {
   margin-bottom: var(--content-spacing) !important;;
 }
-
-#nav-wrapper,
+#nav,
 #skip-links {
  padding: 10px 5px;
  background-color:#111111;
@@ -224,33 +214,44 @@ body {
  background-size: auto 100%;
  background-position:0 0;
 }
-#footer-wrapper {
- background-color:#111111;
- color: #ffffff;
- text-align: right;
- background-image: -webkit-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-webkit-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
- background-image: -moz-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-moz-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
- background-image: -ms-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-ms-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
- background-image: -o-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-o-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
- background-image: linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+
+#header {
+  padding: calc(var(--layout-spacing) * 2) var(--layout-spacing);
+  font-size: 1.1em;
+  background-color:#111111;
+  color:#ffffff;
+  border-radius: 3px 3px 0px 0px;
+  background-image: -webkit-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-webkit-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
+  background-image: -moz-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-moz-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
+  background-image: -ms-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-ms-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
+  background-image: -o-linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),-o-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075));
+  background-image: linear-gradient(top,rgba(255,255,255,0.075),rgba(255,255,255,0)),linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,0.075))
 }
-#header img {
- max-width: 20%;
- height:auto;
- float: right;
+
+.header-logo {
+  position: absolute;
+  right: var(--layout-spacing);
+  top: var(--layout-spacing);
 }
-#header-content{
- max-width: 80%;
- float: left;
- font-size: 110%;
- font-style: italic;
-}
+
 .large {
  font-size: 125%;
 }
 .wrapper .wrapper {
  padding-bottom: 0.25em;
 }
+
+#footer {
+  background-color:#111111;
+  color: #ffffff;
+  text-align: right;
+  background-image: -webkit-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-webkit-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: -moz-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-moz-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: -ms-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-ms-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: -o-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-o-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+}
+
 #footer ul,
 #footer ul li {
  display:block;
@@ -259,10 +260,7 @@ body {
  margin:0;
  padding:0 0.5%;
 }
-h1 {
- width:auto;
- float:left
-}
+
 .link-to-button {
  margin:1em;
  float: right;
@@ -428,3 +426,33 @@ button, input[type=button] {
 button:hover, input[type=button]:hover {
   background: #1BAB3D;
 }
+
+/* TEMP LOCATION FOR OLD RULES THAT WILL BE REPLACED */
+
+#inner-body-wrapper {
+  max-width: 1200px;
+  min-width: 200px;
+  width:100%;
+  margin: 10px auto 10px auto;
+ }
+
+
+ #content-wrapper {
+  width:80%;
+  float:left
+ }
+ #sidebar-wrapper {
+  width: 20%;
+  float:right
+ }
+
+ #footer-wrapper {
+  background-color:#111111;
+  color: #ffffff;
+  text-align: right;
+  background-image: -webkit-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-webkit-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: -moz-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-moz-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: -ms-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-ms-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: -o-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-o-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+  background-image: linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
+ }
