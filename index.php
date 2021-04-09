@@ -16,7 +16,7 @@ $descriptions = array(
     'addons' => 'A collection of UI-Addons for Warhammer-Online.',
 );
 if(empty($_SERVER['HTTP_HOST'])) {
-    $_SERVER['HTTP_HOST'] = 'tools.idrinth.de';
+    $_SERVER['HTTP_HOST'] = $GLOBALS['hostname'];
 }
 require_once __DIR__.'/config.php';
 require_once __DIR__ . '/classes/urlparser.php';

@@ -86,9 +86,9 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
                 if($user['email'] && $user['created'] < time() - 1800) {
                     $code = md5(time() . json_encode($user) . mt_rand() . microtime() . 'PasswordReset');
                     $this->db->query("Insert Into `password` (`user`,`hash`,`created`) VALUES('" . $user['id'] . "','$code','" . time() . "')");
-                    $this->sendMail($user['email'],'<p>Someone asked for a password reset at tools.idrinth.de.</p>'
+                    $this->sendMail($user['email'],'<p>Someone asked for a password reset at ' . $GLOBALS['hostname'] . '.</p>'
                             . '<p>If that wasn\'t you, please ignore this mail nothing will happen.</p>'
-                            . '<p>Otherwise click <a href="https://tools.idrinth.de/account/reset/' . md5($this->db->insert_id . $user['email']) . '/' . $code . '/">Reset Password</a>.</p>','Password Reset');
+                            . '<p>Otherwise click <a href="https://' . $GLOBALS['hostname'] . '/account/reset/' . md5($this->db->insert_id . $user['email']) . '/' . $code . '/">Reset Password</a>.</p>','Password Reset');
                 }
             }
             return '<p>If that email is know and belongs to an activated account, we send a password retrieval mail to it.</p>';
@@ -104,7 +104,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
                 . '</div></fieldset></form>';
     }
     function getLogout() {
-        setcookie('iadb','',time() - 3600,'/','tools.idrinth.de');
+        setcookie('iadb','',time() - 3600,'/',$GLOBALS['hostname']);
         return '<p>You have been logged out.</p>';
     }
     function getLogin() {
@@ -141,13 +141,13 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         }
         $id = $this->db->insert_id;
         $this->db->query("UPDATE user SET pass='" . md5($id . $_POST['password'][0]) . "' WHERE id=" . $id);
-        $text = '<h1>Welcome to <a href="https://tools.idrinth.de">Idrinth\'s Tools</a></h1>' .
+        $text = '<h1>Welcome to <a href="' . $GLOBALS['hostname'] . '">Idrinth\'s Tools</a></h1>' .
                 '<p>Someone registered using your eMail. Please click the appropriate link below to choose what should happen to that account.</p>' .
-                '<ul><li><a href="https://tools.idrinth.de/account/register/activate/' . md5($_POST['email'] . $_POST['login'] . $_SERVER['REMOTE_ADDR']) . dechex($id) . '/">Activate Account</a></li>' .
-                '<li><a href="https://tools.idrinth.de/account/register/deactivate/' . md5($_POST['email'] . $_POST['login'] . $_SERVER['REMOTE_ADDR']) . dechex($id) . '/">Deactivate and Bann eMail</a></li></ul>' .
+                '<ul><li><a href="https://' . $GLOBALS['hostname'] . '/account/register/activate/' . md5($_POST['email'] . $_POST['login'] . $_SERVER['REMOTE_ADDR']) . dechex($id) . '/">Activate Account</a></li>' .
+                '<li><a href="https://' . $GLOBALS['hostname'] . '/account/register/deactivate/' . md5($_POST['email'] . $_POST['login'] . $_SERVER['REMOTE_ADDR']) . dechex($id) . '/">Deactivate and Bann eMail</a></li></ul>' .
                 '<hr />' .
                 '<p>Idrinth\'s Tools is a website dedicated to help players of Warhammer Online: Age of Reckoning.</p>' .
-                '<p>It is created and operated by Björn "Idrinth" Büttner, further information is avaible in the <a href="https://tools.idrinth.de/imprint/">website\'s imprint</a></p>';
+                '<p>It is created and operated by Björn "Idrinth" Büttner, further information is avaible in the <a href="https://' . $GLOBALS['hostname'] . '/imprint/">website\'s imprint</a></p>';
         return $this->sendMail($_POST['email'],$text,'Registration at Idrinth\'s Tools');
     }
     function sendMail($mail,$text,$topic) {
@@ -277,7 +277,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
                         . "WHERE id='" . $this->user->id . "' "
                         . "AND pass='" . md5($this->user->id . $_POST['pw-0']) . "'");
                 if($this->db->affected_rows == 1) {
-                    setcookie('iadb',$this->user->login . '|' . sha1($this->user->display . md5($this->user->id . $_POST['pw-n'])),time() + 2592000,'/','tools.idrinth.de');
+                    setcookie('iadb',$this->user->login . '|' . sha1($this->user->display . md5($this->user->id . $_POST['pw-n'])),time() + 2592000,'/',$GLOBALS['hostname']);
                     $content .= '<p>Your password was changed.</p>';
                 }
             }

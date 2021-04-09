@@ -129,13 +129,13 @@ ORDER BY main DESC,sub DESC, bug DESC");
         FROM addon
         WHERE addon.slug LIKE '" . $this->db->real_escape_string($slug) . "'");
         if(!$res) {
-            header("Location: https://tools.idrinth.de/addons/");
+            header("Location: https://" . $GLOBALS['hostname'] . "/addons/");
             exit;
         }
         $addon = $res->fetch_assoc();
         $res->free();
         if(!$addon['name']) {
-            header("Location: https://tools.idrinth.de/addons/");
+            header("Location: https://" . $GLOBALS['hostname'] . "/addons/");
             exit;
         }
         $this->id = $addon['id'];
