@@ -1,3 +1,5 @@
 /nbproject/
 .vscode
 /config.php
+scripts/sorttable.gzip.js
+scripts/tabs.gzip.js
