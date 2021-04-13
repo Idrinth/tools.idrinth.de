@@ -226,6 +226,20 @@ ini_set('display_errors',1);
 
         $status = '404';
     }
+} elseif($ext == 'svg') {
+    if(is_file('icons/' . $calledPage . '.' . $ext)) {
+        $headers[] = 'Last-Modified: ' . date('r',filemtime('icons/' . $calledPage . '.' . $ext));
+        $headers[] = 'Content-Length: ' . filesize('icons/' . $calledPage . '.' . $ext);
+        $headers[] = 'Content-Type: image/svg+xml';
+        $headers[] = 'Expires: ' . date('r',time() + 3000000);
+        $page = file_get_contents('icons/' . $calledPage . '.' . $ext);
+    } else {
+        $headers[] = 'Content-Length: 0';
+        $headers[] = 'Content-Type: text/' . $ext;
+        $headers[] = 'Expires: ' . date('r');
+
+        $status = '404';
+    }
 } elseif($ext == 'css') {
     if(is_file('styles/' . $calledPage . '.' . $ext)) {
         $headers[] = 'Last-Modified: ' . date('r',filemtime('styles/' . $calledPage . '.' . $ext));

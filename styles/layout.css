@@ -13,10 +13,8 @@ This stylesheet creates the basic layout for all pages of tools.idrinth.de
   
   --font-size-small: 0.7em;
 }
-
-body {
- font-size: 13px;
- font-family: Arial,sans-serif;
+* {
+  box-sizing: border-box;
 }
 h1 {
  font-size: 1.5em;
@@ -127,7 +125,10 @@ textarea {
 * Design
 **/
 body {
- margin:0;
+ font-size: 13px;
+ font-family: Arial,sans-serif;
+ width: 1200px;
+ margin: 10px auto;
  padding:0;
  background-color: #999999;
  background-image: -webkit-repeating-linear-gradient(right bottom, rgba(255,0,0,0.01) 0px, rgba(255,0,0,0) 5px),-webkit-repeating-linear-gradient(left top, rgba(255,0,0,0.01) 0px, rgba(255,0,0,0) 5px);
@@ -216,6 +217,7 @@ main {
 }
 
 #header {
+  position: relative;
   padding: calc(var(--layout-spacing) * 2) var(--layout-spacing);
   font-size: 1.1em;
   background-color:#111111;
@@ -420,7 +422,7 @@ input[type=button],
 .actionButton{
   text-decoration: none;
  background:#189933;
- padding:calc(var(--content-spacing) / 2) var(--content-spacing);
+ padding:var(--content-spacing) var(--content-spacing);
  border-radius:5px;
  border: none;
  color:#FFF;
@@ -463,3 +465,133 @@ input[type=button]:hover,
   background-image: -o-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),-o-linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
   background-image: linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,0.075)),linear-gradient(left,rgba(255,255,255,0.075),rgba(255,255,255,0));
  }
+
+#content > div, #content > form, #content > table {
+  margin: 10px 0;
+}
+
+.search {
+  display: flex;
+}
+
+.search .searchField {
+  margin-right:var(--content-spacing);
+}
+
+.search .searchField:last-child {
+  margin-right: 0;
+}
+
+.search .searchField.tag {
+  flex: 2 1 100px;
+}
+
+.search .searchField.name {
+  flex: 4 1 150px;
+}
+
+.search .searchField.button {
+  flex : 0 1 130px;
+  align-self: flex-end;
+}
+
+.search .searchField .actionButton {
+  width: 100%;
+}
+
+.search input, .search select {
+ padding:var(--content-spacing);
+ border-radius:5px;
+ border:1px solid #999;
+ width: 100%;
+}
+.actionButton .icon {
+ width:18px;
+ height:18px;
+ stroke:currentColor;
+ stroke-width:2;
+ stroke-linecap:round;
+ stroke-linejoin:round;
+ fill:none;
+ vertical-align:bottom;
+}
+.searchField {
+  display:inline-block;
+}
+.searchField label {
+  color: #999;
+  font-size: 0.9em;
+}
+
+table { 
+  border: 1px solid #999;
+  border-collapse: separate;
+  border-left: 0;
+  border-radius: 4px;
+  border-spacing: 0px;
+  width: 100%;
+}
+thead {
+  display: table-header-group;
+  vertical-align: middle;
+  border-color: inherit;
+  border-collapse: separate;
+}
+tr {
+  display: table-row;
+  vertical-align: inherit;
+  border-color: inherit;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  border-left: 1px solid #999;    
+  padding: var(--content-spacing);
+}
+td {
+  border-top: 1px solid #999;    
+}
+thead:first-child tr:first-child th:first-child, tbody:first-child tr:first-child td:first-child {
+  border-radius: 4px 0 0 0;
+}
+thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td:first-child {
+  border-radius: 0 0 0 4px;
+}
+
+.searchResults {
+  border-top: 3px solid #666;
+}
+
+.addonListing {
+  padding: var(--content-spacing);
+  border: 1px solid #999;
+  border-radius: 5px;
+  margin-top: var(--content-spacing);
+  position:relative;
+}
+.addonListing h3 {
+  margin: 0;
+  display: inline-block;
+  margin-right: var(--content-spacing);
+}
+
+.addonListing h3 a, .addonListing h3 a:visited {
+  text-decoration: none;
+  color: #00F;
+}
+
+.addonListing .summary {
+  min-height: 16px;
+}
+
+.addonListing .version {
+  padding: 2px 5px;
+  background: #59F;
+  border-radius:10px;
+  color: #FFF;
+}
+.addonListing .actionButton {
+  position:absolute;
+  right: var(--content-spacing);
+  top: var(--content-spacing);
+}
