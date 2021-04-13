@@ -339,28 +339,33 @@ ORDER BY lastUpdate DESC,name ASC";
             $content .= '<div class="searchResults">';
             while($item = $res->fetch_assoc()) {
                 $content .= '<div class="addonListing">
-                                <h3><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></h3>';
-                                if(!empty($item['main'])) {
-                                    $content .= '<span class="version">v' . $item['curVersion'] . '</span>';
-                                }
-                                $content .= '<span class="lastUpdate">Updated ' . $this->humanTiming($item['lastUpdate']) . ' ago</span>
-                                <span class="downloads">' . number_format($item['downloads']) . ' downloads</span>
-                                <span class="endorsements">' . number_format($item['endorsements']) . ' endorsements</span>';
-                                
-                                if($item)
-                                $tags = explode(',', $item['tags']);
-                                
-                                foreach($tags as $tag) {
-                                    $content .= '<span class="tag">' . $tag . '</span>';
-                                }
-
-                                $content .= '<p class="summary">' . $item['description'] . '</p>';
-                                if(!empty($item['main'])) {
-                                    $content .= '<a rel="nofollow" class="actionButton" href="addons/' . $addon['slug'] . '/download/' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '/">
-                                        <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
-                                        Download
-                                    </a>';
-                                }
+                                <div class="info">
+                                    <header><h3><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></h3>';
+                                    if(!empty($item['main'])) {
+                                        $content .= '<span class="version">v' . $item['curVersion'] . '</span>';
+                                    }
+                                    if(!empty($item['tags'])) {
+                                        $tags = explode(',', $item['tags']);
+                                        
+                                        foreach($tags as $tag) {
+                                            $content .= '<span class="tag">' . $tag . '</span>';
+                                        }
+                                    }
+                                    $content .= "</header>";
+                                    $content .= '<p class="addonMetaData">Updated ' . $this->humanTiming($item['lastUpdate']) . ' ago | 
+                                    ' . number_format($item['downloads']) . ' downloads | 
+                                    ' . number_format($item['endorsements']) . ' endorsements</p>
+                                    
+                                </div>';                                   
+                                    
+                                    
+                                    //\$content .= '<p class="summary">' . $item['description'] . '</p>';
+                                    if(!empty($item['main'])) {
+                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $addon['slug'] . '/download/' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '/">
+                                            <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
+                                            Download
+                                        </a></div>';
+                                    }
                             $content .= '</div>';
 
                 // $content .= '<tr>

@@ -476,6 +476,7 @@ input[type=button]:hover,
 
 .search .searchField {
   margin-right:var(--content-spacing);
+  align-self: flex-end;
 }
 
 .search .searchField:last-child {
@@ -491,8 +492,7 @@ input[type=button]:hover,
 }
 
 .search .searchField.button {
-  flex : 0 1 130px;
-  align-self: flex-end;
+  flex : 0 1 140px;
 }
 
 .search .searchField .actionButton {
@@ -568,7 +568,17 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
   border-radius: 5px;
   margin-top: var(--content-spacing);
   position:relative;
+  display: flex;
 }
+
+.addonListing .info {
+  flex: 4 1 200px;
+}
+
+.addonListing .actions {
+  flex: 1 1 100px;
+}
+
 .addonListing h3 {
   margin: 0;
   display: inline-block;
@@ -579,19 +589,28 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
   text-decoration: none;
   color: #00F;
 }
-
-.addonListing .summary {
-  min-height: 16px;
+.addonListing .version,
+.addonListing .tag {
+  padding: 2px 5px;
+  border-radius:10px;
+  color: #FFF;
+  margin-right:3px;
 }
 
 .addonListing .version {
-  padding: 2px 5px;
   background: #59F;
-  border-radius:10px;
-  color: #FFF;
+}
+
+.addonListing .tag {
+  background: #666;
 }
 .addonListing .actionButton {
-  position:absolute;
-  right: var(--content-spacing);
-  top: var(--content-spacing);
+  float: right;
+}
+.addonListing .addonMetaData {
+  color: #999;
+  font-size: 0.9em;
+}
+header {
+  margin-bottom:2px;
 }
