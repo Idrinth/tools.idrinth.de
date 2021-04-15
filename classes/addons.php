@@ -305,6 +305,21 @@ ORDER BY main DESC,sub DESC, bug DESC");
         }
 
     }
+    function getSortingOptions() {
+        return '
+            <label for="sortBy">Sort by: </label>
+            <select id="sortBy">
+                <option value="mostToLeastRecentUpdate" selected>Most Recently Updated</option>
+                <option value="leastToMostRecentUpdate">Least Recently Updated</option>
+                <option value="highToLowDownloads">Most Downloads</option>
+                <option value="lowToHighDownloads">Least Downloads</option>
+                <option value="highToLowEndorsements">Most Endorsements</option>
+                <option value="lowToHighEndorsements">Least Endorsements</option>
+                <option value="alphabeticalName">Name A-Z</option>
+                <option value="alphabeticalNameReverse">Name Z-A</option>
+            </select>';
+    }
+
     function getOverview() {
         $content = '';
 
@@ -320,7 +335,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
         COUNT(*) as downloads,
         (SELECT COUNT(*) FROM endorsement WHERE endorsement.addon = addon.id) as endorsements,
         description.description as description,
-        GROUP_CONCAT(tag.name) as tags
+        GROUP_CONCAT( DISTINCT tag.name) as tags
     FROM addon
     LEFT JOIN download on download.addon=addon.id
     LEFT JOIN version on addon.id = version.addon
@@ -332,13 +347,23 @@ ORDER BY main DESC,sub DESC, bug DESC");
 " . (isset($_POST['search']) && strlen($_POST['search']) > 0?"AND lower(addon.name) LIKE '%" . $this->db->real_escape_string(mb_strtolower($_POST['search'])) . "%'":'') . "
 GROUP BY addon.id
 ORDER BY lastUpdate DESC,name ASC";
-
-
         $res = $this->db->query($q);
         if($res) {
+            $content .= '<div class="searchWrapper">';
+            $content .= '<div class="searchOptions">';
+            $content .= $this->getSortingOptions();
+            $content .= '</div>';
             $content .= '<div class="searchResults">';
             while($item = $res->fetch_assoc()) {
-                $content .= '<div class="addonListing">
+
+                $sortableData = [
+                    'name' => $item['name'],
+                    'downloads' => $item['downloads'],
+                    'endorsements' => $item['endorsements'],
+                    'lastUpdate' => $item['lastUpdate']
+                ];
+
+                $content .= '<div class="addonListing" data-addon="' . htmlspecialchars(json_encode($sortableData), ENT_QUOTES, 'UTF-8') .'">
                                 <div class="info">
                                     <header><h3><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></h3>';
                                     if(!empty($item['main'])) {
@@ -367,35 +392,8 @@ ORDER BY lastUpdate DESC,name ASC";
                                         </a></div>';
                                     }
                             $content .= '</div>';
-
-                // $content .= '<tr>
-                //                 <td>
-                //                     <a href="/addons/' . $item['slug'] . '/">'
-                //                          . $item['name'] . '
-                //                     </a>
-                //                 </td>
-                //                 <td>
-                //                     ' . $item['curVersion'] . '
-                //                 </td>
-                //                 <td>
-                //                     ' . date('r',$item['lastUpdate']) . '
-                //                 </td>
-                //                 <td>
-                //                     ' . number_format($item['downloads']) . '
-                //                 </td>
-                //                 <td>
-                //                     ' . number_format($item['endorsements']) . '
-                //                 </td>
-                //                 <td>';
-                                    
-                // if(!empty($item['main'])) {
-                //     $content .= '<a rel="nofollow" class="actionButton" href="addons/' . $addon['slug'] . '/download/' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '/">
-                //                     <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
-                //                     Download
-                //                 </a>';
-                // }
-                // $content .= '</td></tr>';
             }
+            $content .= '</div>';
             $content .= '</div>';
         }
         $options = '<option value="0">Any</option>';
@@ -403,6 +401,7 @@ ORDER BY lastUpdate DESC,name ASC";
         while ($res && $tag = $res->fetch_assoc()) {
             $options .= '<option value="'.$tag['aid'].'"'.(isset($_POST['tag']) && $tag['aid'] == $_POST['tag'] ? ' selected' : '').'>'.$tag['name'].' ('.$tag['addons'].')</tag>';
         }
+        $optionsDropDown = '<div class="searchField tag"><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>';
         return '<div>
                     <a href="https://github.com/Idrinth/WARAddonClient/releases/latest" class="actionButton" taget="_blank">
                         <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#box"/></svg>
@@ -414,10 +413,7 @@ ORDER BY lastUpdate DESC,name ASC";
                     </a>
                     </div>
         <form method="post" class="search">
-            <div class="searchField tag">
-                <label for="tag">Tagged as</label>
-                <select name="tag" id="tag">'.$options.'</select>
-            </div>
+            ' . $optionsDropDown . '
             <div class="searchField name">
                 <label for="name">Name similar to</label>
                 <input type="text" name="search" value="' . $_POST['search'] . '" id="name"/>
@@ -429,8 +425,7 @@ ORDER BY lastUpdate DESC,name ASC";
                 </button>
             </div>
         </form>
-        ' . $content;
-        //<table class="sorttable sortable"><thead><tr><th>Name</th><th>Version</th><th>Updated</th><th>Downloads</th><th>Endorsements</th><th>Download</th></tr></thead><tbody>' . $content . '</tbody></table>
+        '. $content;
     }
     function uploadFile($addon) {
         if(!$this->user->isActive()) {

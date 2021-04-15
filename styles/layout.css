@@ -27,7 +27,6 @@ h2 {
 }
 div,
 p,
-label,
 textarea{
  display: block;
  height: auto;
@@ -470,6 +469,10 @@ input[type=button]:hover,
   margin: 10px 0;
 }
 
+#content > div.tabs {
+  margin: 0;
+}
+
 .search {
   display: flex;
 }
@@ -499,12 +502,16 @@ input[type=button]:hover,
   width: 100%;
 }
 
-.search input, .search select {
+.search input, .search select, .searchOptions select {
  padding:var(--content-spacing);
  border-radius:5px;
  border:1px solid #999;
- width: 100%;
 }
+
+.search input, .search select {
+  width: 100%;
+}
+
 .actionButton .icon {
  width:18px;
  height:18px;
@@ -558,7 +565,7 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
   border-radius: 0 0 0 4px;
 }
 
-.searchResults {
+.searchWrapper {
   border-top: 3px solid #666;
 }
 
@@ -566,9 +573,9 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
   padding: var(--content-spacing);
   border: 1px solid #999;
   border-radius: 5px;
-  margin-top: var(--content-spacing);
   position:relative;
   display: flex;
+  margin-bottom: var(--content-spacing);
 }
 
 .addonListing .info {
@@ -613,4 +620,20 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 }
 header {
   margin-bottom:2px;
+}
+.searchWrapper {
+  display: flex;
+}
+
+.searchOptions, .searchResults {
+  margin-top: var(--content-spacing);
+}
+
+.searchOptions {
+  flex: 1 1 150px;
+  margin-right: var(--content-spacing);
+}
+
+.searchResults {
+  flex: 4 1 300px;
 }
