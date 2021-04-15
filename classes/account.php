@@ -304,11 +304,14 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         $content .= '<img class="left" title="' . $user['display'] . '" alt="' . $user['display'] . '" src="' .
                 (is_file($_SERVER['DOCUMENT_ROOT'] . '/img/profile/' . $user['slug'] . '.png')?'/img/profile/' . $user['slug'] . '.png':'/img/profile/default.png') . '"/>';
         if($own) {
-            $content.='<form method="post" class="wrapper" enctype="multipart/form-data">';
-            $content.='<div class="wrapper"><label for="pic">New Picture</label><input type="file" name="pic" id="pic"/></div>';
-            $content.='<div class="wrapper"><button type="submit">Change Picture</button></div>';
+            $content.='<form method="post" enctype="multipart/form-data">';
+            $content.='<div class="formRow"><label for="pic">New Picture</label><input type="file" name="pic" id="pic"/></div>';
+            $content.='<button type="submit">
+                            <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#image"/></svg>
+                            Change Picture
+                        </button>';
             $content.='</form>';
-            $content.='<form method="post" class="wrapper">';
+            $content.='<form method="post">';
         }
         $content .= '<table class="account-table right"><tbody>';
         $content .= '<tr><th>Display Name</th><td>' . $user['display'] . '</td></tr>';
@@ -317,7 +320,23 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         $content .= '<tr><th>Current Points</th><td>' . number_format($user['points'],0,'.',',') . '</td></tr>';
         $content .= '<tr><th>Registered</th><td>' . date('Y-m-d H:i',$user['time_register']) . '</td></tr>';
         if($own) {
-            $content .= '<tr><th>Password</th><td><label for="pw-n">New</label><input type="password" name="pw-n" id="pw-n"><label for="pw-o">Old</label><input type="password" name="pw-o" id="pw-o"><button type="submit">Change Password</button></td></tr>';
+            $content .= '<tr>
+                            <th>Password</th>
+                            <td>
+                                <div class="formRow">
+                                    <label for="pw-n">New</label>
+                                    <input type="password" name="pw-n" id="pw-n">
+                                </div>
+                                <div class="formRow">
+                                    <label for="pw-o">Old</label>
+                                    <input type="password" name="pw-o" id="pw-o">
+                                </div>
+                                <button type="submit">
+                                    <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#lock"/></svg>
+                                    Change Password
+                                </button>
+                            </td>
+                        </tr>';
         }
         return $content . '</tbody></table>' . ($own?'</form>':'');
     }

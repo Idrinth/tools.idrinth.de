@@ -143,7 +143,7 @@ class view {
     protected function generateSidebar() {
         include __DIR__ . '/../ressources/updates.php';
         $content = '<div id="side-column">
-              <h2>last Updates</h2>
+              <h2>Last Updates</h2>
                             <ul>';
         $count = 0;
         foreach($updates as $mainVersion => $a1) {

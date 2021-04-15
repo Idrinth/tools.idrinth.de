@@ -88,6 +88,17 @@ class addons {
         }
         return str_replace('data-name="en"','style="display:block;" data-name="en"',$content) . '</div>';
     }
+    function getEndorseButton($isEndorsed) {
+        $value = $isEndorsed ? 0 : 1;
+        $text = $isEndorsed ? "Unendorse" : "Endorse";
+        $class = $isEndorsed ? "" : 'class="secondary"';
+        return '<form method="POST" class="endorsement">
+                    <button type="submit" value="' . $value . '" name="endorsement" ' . $class . '>
+                        <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#thumbs-up"/></svg>
+                        '. $text .'
+                    </button>
+                </form>';
+    }
     function displayAddon(&$addon) {
         $tags = '';
         $res = $this->db->query("SELECT GROUP_CONCAT(name) FROM tag INNER JOIN addon_tag ON tag=aid WHERE addon=" . $this->id);
@@ -100,11 +111,9 @@ class addons {
             $this->db->query("INSERT INTO endorsement (user, addon, endorsed) VALUES (".$this->user->id.",".$addon['id'].",".(intval($_POST['endorsement'])?1:0).") ON DUPLICATE KEY UPDATE endorsed=".(intval($_POST['endorsement'])?1:0));
         }
         $res = $this->db->query("SELECT endorsed FROM endorsement WHERE user=".$this->user->id." AND addon=".$addon['id']);
-        if ($res && $res->fetch_assoc()['endorsed']) {
-            $content .= '<form method="POST" class="endorsement"><button type="submit" value="0" name="endorsement">UNENDORSE</button></form>';
-        } else {
-            $content .= '<form method="POST" class="endorsement"><button type="submit" value="1" name="endorsement">ENDORSE</button></form>';
-        }
+        
+        $content .= $this->getEndorseButton($res && $res->fetch_assoc()['endorsed']);
+            
         $content .= '<table><thead><tr><th>Version</th><th>Status</th><th>Changes</th><th>Uploader</th><th>Downloads</th></tr></thead><tbody>';
         $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(*) as downloads
 FROM version
@@ -354,6 +363,11 @@ ORDER BY lastUpdate DESC,name ASC";
             $content .= $this->getSortingOptions();
             $content .= '</div>';
             $content .= '<div class="searchResults">';
+
+            if($res->num_rows <= 0) {
+                $content .= '<p class="placeholderResultText">No addons match your search terms.</p>';
+            }
+
             while($item = $res->fetch_assoc()) {
 
                 $sortableData = [

@@ -112,8 +112,7 @@ textarea {
  float: right;
 }
 .wrapper button {
- width: 35%;
- margin: 0 3%;
+ width: 150px;
 }
 
 
@@ -421,9 +420,9 @@ input[type=button],
 .actionButton{
   text-decoration: none;
  background:#189933;
- padding:var(--content-spacing) var(--content-spacing);
+ border: 2px solid #189933;
+ padding: calc(var(--content-spacing) - 4px);
  border-radius:5px;
- border: none;
  color:#FFF;
  cursor:pointer;
  display: inline-block;
@@ -432,9 +431,17 @@ input[type=button],
 button:hover,
 input[type=button]:hover,
 .actionButton:hover{
- background:#1BAB3D;
+  background:#1BAB3D;
 }
-
+button.secondary {
+  background: #FFF;
+  border: 2px solid #189933;
+  color: #189933;
+}
+button.secondary:hover {
+  background:#189933;
+  color:#FFF;
+}
 /* TEMP LOCATION FOR OLD RULES THAT WILL BE REPLACED */
 
 #inner-body-wrapper {
@@ -512,7 +519,7 @@ input[type=button]:hover,
   width: 100%;
 }
 
-.actionButton .icon {
+.icon {
  width:18px;
  height:18px;
  stroke:currentColor;
@@ -636,4 +643,18 @@ header {
 
 .searchResults {
   flex: 4 1 300px;
+}
+.placeholderResultText {
+  text-align: center;
+  color: #999;
+  font-size: 1.2em;
+  margin-top: var(--layout-spacing);
+}
+.formRow label {
+  display: inline-block;
+  width: 100px;
+}
+
+.formRow input {
+  width: 250px;
 }
