@@ -8,10 +8,6 @@ var media = {
         'button' : null,
         'code' : null,
     },
-    'google':{
-        'button' : null,
-        'code' : new Array(null,null),
-    }
 };
 /*
  * socialshareprivacy.js | 2 Klicks fuer mehr Datenschutz
@@ -110,14 +106,6 @@ function socialSharePrivacy() {
                 'tweet_text'        : getTweetText,
                 'language'          : 'en'
             },
-            'gplus' : {
-                'status'            : 'on',
-                'dummy_img'         : 'dummy_gplus.png',
-                'perma_option'      : 'on',
-                'display_name'      : 'Google+',
-                'referrer_track'    : '',
-                'language'          : 'en'
-            }
         },
         'cookie_path'       : '/',
         'cookie_domain'     : document.location.host,
@@ -127,7 +115,6 @@ function socialSharePrivacy() {
     };
     var facebook_on = (options.services.facebook.status === 'on');
     var twitter_on  = (options.services.twitter.status  === 'on');
-    var gplus_on    = (options.services.gplus.status    === 'on');
 
     // check if at least one service is "on"
     if (!facebook_on && !twitter_on && !gplus_on) {
@@ -217,44 +204,6 @@ function socialSharePrivacy() {
         grandchild = document.createElement('div');
         grandchild.setAttribute('class','tweet dummy_btn');
         grandchild.appendChild(media.twitter.button);
-        child.appendChild(grandchild);
-        //add to ul
-        father.appendChild(child);
-    }
-
-    //
-    // Google+
-    //
-    if (gplus_on) {
-    // fuer G+ wird die URL nicht encoded, da das zu einem Fehler fuehrt
-        var gplus_uri = uri + options.services.gplus.referrer_track;
-
-        media.google.code[0] = document.createElement('div');
-        media.google.code[0].setAttribute('class','g-plusone');
-        media.google.code[0].setAttribute('data-size','medium');
-        media.google.code[0].setAttribute('data-href',uri + options.services.gplus.referrer_track);
-        media.google.code[1] = document.createElement('script');
-        media.google.code[1].setAttribute('type','text/javascript');
-        media.google.code[1].appendChild(document.createTextNode('window.___gcfg = {lang: "' + options.services.gplus.language + '"}; (function() { var po = document.createElement("script"); po.type = "text/javascript"; po.async = true; po.src = "https://apis.google.com/js/plusone.js"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s); })();'));
-        media.google.button = document.createElement('img');
-        media.google.button.setAttribute('src',options.services.gplus.dummy_img);
-        media.google.button.setAttribute('alt','Google+1');
-        media.google.button.setAttribute('class','gplus_one_dummy');
-        media.google.button.setAttribute('style','border:none; overflow:hidden; width:32px; height:20px;');
-        media.google.button.setAttribute('onclick','switchTurner(\'google\')');
-
-        child = document.createElement('li');
-        child.setAttribute('class','google help_info');
-        child.setAttribute('id','google');
-        //switch
-        grandchild = document.createElement('span');
-        grandchild.setAttribute('class','switch off');
-        grandchild.setAttribute('onclick','switchTurner(\'google\')');
-        child.appendChild(grandchild);
-        //button
-        grandchild = document.createElement('div');
-        grandchild.setAttribute('class','gplusone dummy_btn');
-        grandchild.appendChild(media.google.button);
         child.appendChild(grandchild);
         //add to ul
         father.appendChild(child);
