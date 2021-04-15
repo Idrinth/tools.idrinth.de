@@ -103,10 +103,13 @@ class addons {
         $tags = '';
         $res = $this->db->query("SELECT GROUP_CONCAT(name) FROM tag INNER JOIN addon_tag ON tag=aid WHERE addon=" . $this->id);
         if($res) {
-            $tags = $res->fetch_row()[0];
+            $tagMarkup = '';
+            $tags = explode(',', $res->fetch_row()[0]);                                        
+            foreach($tags as $tag) {
+                $tagMarkup .= '<span class="tag">' . $tag . '</span>';
+            }   
         }
-        $content = '<h3>Description</h3><ul style="overflow:hidden;height:auto;width:100%;margin:0;padding:0;">';
-        $content .= '<p>' . $tags . '</p></ul>' . $this->makeDescriptions($addon);
+        $content .= '<div class="tags">' . $tagMarkup . '</div>' . $this->makeDescriptions($addon);
         if (isset($_POST['endorsement']) && $this->user->isActive()) {
             $this->db->query("INSERT INTO endorsement (user, addon, endorsed) VALUES (".$this->user->id.",".$addon['id'].",".(intval($_POST['endorsement'])?1:0).") ON DUPLICATE KEY UPDATE endorsed=".(intval($_POST['endorsement'])?1:0));
         }
@@ -409,7 +412,7 @@ ORDER BY lastUpdate DESC,name ASC";
                                     
                                     //\$content .= '<p class="summary">' . $item['description'] . '</p>';
                                     if(!empty($item['main'])) {
-                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '/">
+                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">
                                             <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
                                             Download
                                         </a></div>';
