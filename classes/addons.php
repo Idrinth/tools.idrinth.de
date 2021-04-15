@@ -329,6 +329,15 @@ ORDER BY main DESC,sub DESC, bug DESC");
             </select>';
     }
 
+    function getTagsDropDown() {
+        $options = '<option value="0">Any</option>';
+        $res = $this->db->query("SELECT tag.*, COUNT(addon_tag.addon) as addons FROM tag INNER JOIN addon_tag ON addon_tag.tag=tag.aid GROUP BY tag.aid ORDER BY name ASC");
+        while ($res && $tag = $res->fetch_assoc()) {
+            $options .= '<option value="'.$tag['aid'].'"'.(isset($_POST['tag']) && $tag['aid'] == $_POST['tag'] ? ' selected' : '').'>'.$tag['name'].' ('.$tag['addons'].')</tag>';
+        }
+        return '<div class="searchField tag"><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>';
+    }
+
     function getOverview() {
         $content = '';
 
@@ -400,7 +409,7 @@ ORDER BY lastUpdate DESC,name ASC";
                                     
                                     //\$content .= '<p class="summary">' . $item['description'] . '</p>';
                                     if(!empty($item['main'])) {
-                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $addon['slug'] . '/download/' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '/">
+                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '/">
                                             <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
                                             Download
                                         </a></div>';
@@ -410,12 +419,7 @@ ORDER BY lastUpdate DESC,name ASC";
             $content .= '</div>';
             $content .= '</div>';
         }
-        $options = '<option value="0">Any</option>';
-        $res = $this->db->query("SELECT tag.*, COUNT(addon_tag.addon) as addons FROM tag INNER JOIN addon_tag ON addon_tag.tag=tag.aid GROUP BY tag.aid ORDER BY name ASC");
-        while ($res && $tag = $res->fetch_assoc()) {
-            $options .= '<option value="'.$tag['aid'].'"'.(isset($_POST['tag']) && $tag['aid'] == $_POST['tag'] ? ' selected' : '').'>'.$tag['name'].' ('.$tag['addons'].')</tag>';
-        }
-        $optionsDropDown = '<div class="searchField tag"><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>';
+        
         return '<div>
                     <a href="https://github.com/Idrinth/WARAddonClient/releases/latest" class="actionButton" taget="_blank">
                         <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#box"/></svg>
@@ -427,7 +431,7 @@ ORDER BY lastUpdate DESC,name ASC";
                     </a>
                     </div>
         <form method="post" class="search">
-            ' . $optionsDropDown . '
+            ' . $this->getTagsDropDown() . '
             <div class="searchField name">
                 <label for="name">Name similar to</label>
                 <input type="text" name="search" value="' . $_POST['search'] . '" id="name"/>
