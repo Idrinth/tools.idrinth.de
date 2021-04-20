@@ -1,11 +1,6 @@
-var AddonListSorter = function() {
-    var publicAPI = {
-        sortBy: sortBy,
-        init: init
-    };
-    
+document.addEventListener("DOMContentLoaded", function onLoad() { 
     var _results = [];
-    var _container = document.getElementsByClassName("searchResults")[0]; //TODO: This is iffy but will do for now, DON'T CHECK IT IN #################
+    var _container = document.getElementById("searchResults");
 
     var _sortFunctions = {
         alphabeticalName: (a, b) => a.data.name <= b.data.name ? -1 : 1,
@@ -19,7 +14,6 @@ var AddonListSorter = function() {
     }
 
     function _buildDataStructureFromSearchResults() {
-
         var searchResultElements = document.getElementsByClassName("addonListing");
         for(var i = 0; i < searchResultElements.length; i++) {
             _results.push( {
@@ -27,14 +21,12 @@ var AddonListSorter = function() {
                 "data": JSON.parse(searchResultElements[i].dataset.addon)
             });
         }
-
-
     }
 
     function _updateOrder() {
         for(var i = _results.length - 1; i >= 0; i--) {
             if(_container.children.length >  1) {
-                _container.insertBefore(_results[i].element, _container.children[1]);
+                _container.insertBefore(_results[i].element, _container.children[0]);
             }
         }
     }
@@ -44,15 +36,7 @@ var AddonListSorter = function() {
         _updateOrder();
     }
 
-    function init() {
-        _buildDataStructureFromSearchResults();
-        var dropDown = document.getElementById("sortBy");
-        dropDown.addEventListener("change", () =>  sortBy(dropDown.value));
-    }
-
-    return publicAPI;
-}();
-
-document.addEventListener("DOMContentLoaded", function(event) { 
-    AddonListSorter.init();
+    _buildDataStructureFromSearchResults();
+    var dropDown = document.getElementById("sortBy");
+    dropDown.addEventListener("change", () =>  sortBy(dropDown.value));
 });

@@ -152,7 +152,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
                 Upload new version
             </a>';
         }
-        
+
         return $content;
     }
     function getAddon($slug) {
@@ -390,7 +390,7 @@ ORDER BY lastUpdate DESC,name ASC";
             $content .= '<div class="searchOptions">';
             $content .= $this->getSortingOptions();
             $content .= '</div>';
-            $content .= '<div class="searchResults">';
+            $content .= '<div class="searchResults" id="searchResults">';
 
             if($res->num_rows <= 0) {
                 $content .= '<p class="placeholderResultText">No addons match your search terms.</p>';
