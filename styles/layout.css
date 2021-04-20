@@ -61,9 +61,8 @@ textarea {
 /* Account and AbilityChain stuff to do with .wrapper class, would be ideal to replace with something else */
 .wrapper input,
 .wrapper select{
- width: 35%;
- margin: 0 3%;
- float: left;
+  display: inline-block;
+  width: 35%;
  -webkit-transition-duration: 0.75s;
  -webkit-transition-property: background-color,color;
  -moz-transition-duration: 0.75s;
@@ -79,36 +78,36 @@ textarea {
 .wrapper select:focus {
  background-color: #2C2A3E;
  color: #FFFFFF;
- font-weight: 700;
 }
 .wrapper label {
+  display: inline-block;
  width: 50%;
- float: left;
 }
 .wrapper .unit {
  width: 5%;
- float: right;
+ display: inline-block;
 }
 .wrapper .output .label {
- float: left;
- display:block;
+ display:inline-block;
  width: 45%;
 }
 .wrapper .output .comparison {
+ display:inline-block;
  width: 55%;
- float: right;
- text-align: right;
 }
 .wrapper .output .comparison span{
  width: 60%;
- float: left;
+ text-align: right;
+ display: inline-block;
 }
 .wrapper .output .comparison span.unit{
  width: 20%;
+ display: inline-block;
 }
 .wrapper .output .comparison .compare{
- width: 20%;
- float: right;
+ width: 15%;
+ margin-left: 5%;
+ display: inline-block;
 }
 .wrapper button {
  width: 150px;
