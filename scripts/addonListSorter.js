@@ -36,7 +36,9 @@ document.addEventListener("DOMContentLoaded", function onLoad() {
         _updateOrder();
     }
 
-    _buildDataStructureFromSearchResults();
     var dropDown = document.getElementById("sortBy");
-    dropDown.addEventListener("change", () =>  sortBy(dropDown.value));
+    if(dropDown != null) {
+        _buildDataStructureFromSearchResults();
+        dropDown.addEventListener("change", () =>  sortBy(dropDown.value));
+    }
 });
