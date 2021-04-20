@@ -3,10 +3,10 @@
 }
 #social .social_share_privacy_area {
     list-style-type: none;
-    padding: 0 5%;
     width: auto;
-    height: 25px;
-    display: block;
+    height: 45px;
+    margin:0;
+    padding: var(--content-spacing) 5%;
 }
 #social .social_share_privacy_area li {
     margin: 0;

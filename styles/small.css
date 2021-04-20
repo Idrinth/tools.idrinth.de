@@ -13,7 +13,6 @@ This stylesheet creates mobile layouts for all pages of tools.idrinth.de
     .cols-4 .floating-col {
         width:45%;
         padding: 0 2.5%;
-        float:left;
     }
 }
 @media only screen and (max-width:600px) {
@@ -25,12 +24,10 @@ This stylesheet creates mobile layouts for all pages of tools.idrinth.de
     .cols-4 .floating-col {
         width:95%;
         padding: 0 2.5%;
-        float:none;
     }
     #nav ul li,
     #skip-links ul li {
-        display: block;
-        float:left;
+        display: inline-block;
         padding: 5px 5%;
         width: 40%;
     }
@@ -38,7 +35,6 @@ This stylesheet creates mobile layouts for all pages of tools.idrinth.de
 @media only screen and (max-width:400px) {
     #nav ul li,
     #skip-links ul li {
-        float:none;
         width: 90%;
     }
     .link-to-button {

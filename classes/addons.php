@@ -89,6 +89,10 @@ class addons {
         return str_replace('data-name="en"','style="display:block;" data-name="en"',$content) . '</div>';
     }
     function getEndorseButton($isEndorsed) {
+        if(!$this->user->isActive() || $this->user->banned) {
+            return ""; //Can't endorse if not logged in / banned.
+        }
+
         $value = $isEndorsed ? 0 : 1;
         $text = $isEndorsed ? "Unendorse" : "Endorse";
         $class = $isEndorsed ? "" : 'class="secondary"';
@@ -106,7 +110,7 @@ class addons {
             $tagMarkup = '';
             $tagString = $res->fetch_row()[0];
             if(!empty($tagString)) {
-                $tags = explode(',', );                                        
+                $tags = explode(',', $tagString);                                        
                 foreach($tags as $tag) {
                     $tagMarkup .= '<span class="tag">' . $tag . '</span>';
                 }   
@@ -140,7 +144,16 @@ ORDER BY main DESC,sub DESC, bug DESC");
             }
             $res->free();
         }
-        return $content . '</tbody></table><a href="/addons/' . $addon['slug'] . '/upload/" title="new version">+</a>';
+        $content .= '</tbody></table>';
+
+        if($this->user->isActive() && !$this->user->banned) {
+            $content .= '<a title="Add new Addon" href="/addons/' . $addon['slug'] . '/upload/" class="actionButton" title="Upload new version">
+            <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#upload"/></svg>
+                Upload new version
+            </a>';
+        }
+        
+        return $content;
     }
     function getAddon($slug) {
         $res = $this->db->query("SELECT addon.name,addon.slug,addon.id
@@ -412,8 +425,6 @@ ORDER BY lastUpdate DESC,name ASC";
                                     
                                 </div>';                                   
                                     
-                                    
-                                    //\$content .= '<p class="summary">' . $item['description'] . '</p>';
                                     if(!empty($item['main'])) {
                                         $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">
                                             <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
