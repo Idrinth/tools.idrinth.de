@@ -104,10 +104,13 @@ class addons {
         $res = $this->db->query("SELECT GROUP_CONCAT(name) FROM tag INNER JOIN addon_tag ON tag=aid WHERE addon=" . $this->id);
         if($res) {
             $tagMarkup = '';
-            $tags = explode(',', $res->fetch_row()[0]);                                        
-            foreach($tags as $tag) {
-                $tagMarkup .= '<span class="tag">' . $tag . '</span>';
-            }   
+            $tagString = $res->fetch_row()[0];
+            if(!empty($tagString)) {
+                $tags = explode(',', );                                        
+                foreach($tags as $tag) {
+                    $tagMarkup .= '<span class="tag">' . $tag . '</span>';
+                }   
+            }
         }
         $content .= '<div class="tags">' . $tagMarkup . '</div>' . $this->makeDescriptions($addon);
         if (isset($_POST['endorsement']) && $this->user->isActive()) {
