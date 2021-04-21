@@ -12,6 +12,8 @@ This stylesheet creates the basic layout for all pages of tools.idrinth.de
   --content-spacing: 10px;
   
   --font-size-small: 0.7em;
+  --button-color: #b32e27;
+  --button-color-hover: #a31e17;
 }
 * {
   box-sizing: border-box;
@@ -418,8 +420,8 @@ button,
 input[type=button],
 .actionButton{
   text-decoration: none;
- background:#189933;
- border: 2px solid #189933;
+ background: var(--button-color);
+ border: 2px solid var(--button-color);
  padding: calc(var(--content-spacing) - 4px);
  border-radius:5px;
  color:#FFF;
@@ -430,15 +432,15 @@ input[type=button],
 button:hover,
 input[type=button]:hover,
 .actionButton:hover{
-  background:#1BAB3D;
+  background: var(--button-color-hover);
 }
 button.secondary {
   background: #FFF;
-  border: 2px solid #189933;
-  color: #189933;
+  border: 2px solid var(--button-color);
+  color: var(--button-color);
 }
 button.secondary:hover {
-  background:#189933;
+  background: var(--button-color);
   color:#FFF;
 }
 
