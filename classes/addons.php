@@ -39,7 +39,10 @@ class addons {
             $page .= $this->getAddon($GLOBALS['parser']->getPage(1));
         }
         $view = new view();
-        return $view->generateStaticPage($page . $this->makeComments(),$addon);
+
+        $pageTitle = $addon == '' ? "Addons" : $addon;
+
+        return $view->generateStaticPage($page . $this->makeComments(),$pageTitle);
     }
     function downloadAddon($slug,$version) {
         $res = $this->db->query("SELECT version.data,version.id,version.addon FROM `version`
@@ -85,23 +88,42 @@ class addons {
         }
         return str_replace('data-name="en"','style="display:block;" data-name="en"',$content) . '</div>';
     }
+    function getEndorseButton($isEndorsed) {
+        if(!$this->user->isActive() || $this->user->banned) {
+            return ""; //Can't endorse if not logged in / banned.
+        }
+
+        $value = $isEndorsed ? 0 : 1;
+        $text = $isEndorsed ? "Unendorse" : "Endorse";
+        $class = $isEndorsed ? "" : 'class="secondary"';
+        return '<form method="POST" class="endorsement">
+                    <button type="submit" value="' . $value . '" name="endorsement" ' . $class . '>
+                        <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#thumbs-up"/></svg>
+                        '. $text .'
+                    </button>
+                </form>';
+    }
     function displayAddon(&$addon) {
         $tags = '';
         $res = $this->db->query("SELECT GROUP_CONCAT(name) FROM tag INNER JOIN addon_tag ON tag=aid WHERE addon=" . $this->id);
         if($res) {
-            $tags = $res->fetch_row()[0];
+            $tagMarkup = '';
+            $tagString = $res->fetch_row()[0];
+            if(!empty($tagString)) {
+                $tags = explode(',', $tagString);                                        
+                foreach($tags as $tag) {
+                    $tagMarkup .= '<span class="tag">' . $tag . '</span>';
+                }   
+            }
         }
-        $content = '<h3>Description</h3><ul style="overflow:hidden;height:auto;width:100%;margin:0;padding:0;">';
-        $content .= '<p>' . $tags . '</p></ul>' . $this->makeDescriptions($addon);
+        $content .= '<div class="tags">' . $tagMarkup . '</div>' . $this->makeDescriptions($addon);
         if (isset($_POST['endorsement']) && $this->user->isActive()) {
             $this->db->query("INSERT INTO endorsement (user, addon, endorsed) VALUES (".$this->user->id.",".$addon['id'].",".(intval($_POST['endorsement'])?1:0).") ON DUPLICATE KEY UPDATE endorsed=".(intval($_POST['endorsement'])?1:0));
         }
         $res = $this->db->query("SELECT endorsed FROM endorsement WHERE user=".$this->user->id." AND addon=".$addon['id']);
-        if ($res && $res->fetch_assoc()['endorsed']) {
-            $content .= '<form method="POST"><button type="submit" value="0" name="endorsement">UNENDORSE</button></form>';
-        } else {
-            $content .= '<form method="POST"><button type="submit" value="1" name="endorsement">ENDORSE</button></form>';
-        }
+        
+        $content .= $this->getEndorseButton($res && $res->fetch_assoc()['endorsed']);
+            
         $content .= '<table><thead><tr><th>Version</th><th>Status</th><th>Changes</th><th>Uploader</th><th>Downloads</th></tr></thead><tbody>';
         $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(*) as downloads
 FROM version
@@ -122,20 +144,29 @@ ORDER BY main DESC,sub DESC, bug DESC");
             }
             $res->free();
         }
-        return $content . '</tbody></table><a href="/addons/' . $addon['slug'] . '/upload/" title="new version">+</a>';
+        $content .= '</tbody></table>';
+
+        if($this->user->isActive() && !$this->user->banned) {
+            $content .= '<a title="Add new Addon" href="/addons/' . $addon['slug'] . '/upload/" class="actionButton" title="Upload new version">
+            <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#upload"/></svg>
+                Upload new version
+            </a>';
+        }
+
+        return $content;
     }
     function getAddon($slug) {
         $res = $this->db->query("SELECT addon.name,addon.slug,addon.id
         FROM addon
         WHERE addon.slug LIKE '" . $this->db->real_escape_string($slug) . "'");
         if(!$res) {
-            header("Location: https://tools.idrinth.de/addons/");
+            header("Location: https://" . $GLOBALS['hostname'] . "/addons/");
             exit;
         }
         $addon = $res->fetch_assoc();
         $res->free();
         if(!$addon['name']) {
-            header("Location: https://tools.idrinth.de/addons/");
+            header("Location: https://" . $GLOBALS['hostname'] . "/addons/");
             exit;
         }
         $this->id = $addon['id'];
@@ -280,32 +311,162 @@ ORDER BY main DESC,sub DESC, bug DESC");
         }
         return $content . '</div>';
     }
-    function getOverview() {
-        $content = '';
-        $res = $this->db->query("SELECT addon.id,name,slug,curVersion,lastUpdate, COUNT(*) as downloads
-            FROM addon
-            LEFT JOIN download on download.addon=addon.id
-            WHERE active
-            ".(isset($_POST['tag']) && $_POST['tag']!=0 && is_numeric($_POST['tag']) ? "AND addon.id IN (SELECT addon FROM addon_tag WHERE tag=".$_POST['tag'].")" : "")."
-        " . (isset($_POST['search']) && strlen($_POST['search']) > 0?"AND lower(addon.name) LIKE '%" . $this->db->real_escape_string(mb_strtolower($_POST['search'])) . "%'":'') . "
-        GROUP BY addon.id
-        ORDER BY lastUpdate DESC,name ASC");
-        if($res) {
-            while($item = $res->fetch_assoc()) {
-                $item['endorsements'] = (int) $this->db->query("SELECT SUM(endorsed) FROM endorsement WHERE addon=".$item['id'])->fetch_row()[0];
-                $content .= '<tr><td><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></td><td>' . $item['curVersion'] . '</td><td>' . date('r',$item['lastUpdate']) . '</td><td>' . number_format($item['downloads']) . '</td><td>' . number_format($item['endorsements']) . '</td></tr>';
-            }
+    function humanTiming($time)
+    {
+
+        $time = time() - $time; 
+        $time = ($time<1)? 1 : $time;
+        $tokens = array (
+            31536000 => 'year',
+            2592000 => 'month',
+            604800 => 'week',
+            86400 => 'day',
+            3600 => 'hour',
+            60 => 'minute',
+            1 => 'second'
+        );
+
+        foreach ($tokens as $unit => $text) {
+            if ($time < $unit) continue;
+            $numberOfUnits = floor($time / $unit);
+            return $numberOfUnits.' '.$text.(($numberOfUnits>1)?'s':'');
         }
+
+    }
+    function getSortingOptions() {
+        return '
+            <label for="sortBy">Sort by: </label>
+            <select id="sortBy">
+                <option value="mostToLeastRecentUpdate" selected>Most Recently Updated</option>
+                <option value="leastToMostRecentUpdate">Least Recently Updated</option>
+                <option value="highToLowDownloads">Most Downloads</option>
+                <option value="lowToHighDownloads">Least Downloads</option>
+                <option value="highToLowEndorsements">Most Endorsements</option>
+                <option value="lowToHighEndorsements">Least Endorsements</option>
+                <option value="alphabeticalName">Name A-Z</option>
+                <option value="alphabeticalNameReverse">Name Z-A</option>
+            </select>';
+    }
+
+    function getTagsDropDown() {
         $options = '<option value="0">Any</option>';
         $res = $this->db->query("SELECT tag.*, COUNT(addon_tag.addon) as addons FROM tag INNER JOIN addon_tag ON addon_tag.tag=tag.aid GROUP BY tag.aid ORDER BY name ASC");
         while ($res && $tag = $res->fetch_assoc()) {
             $options .= '<option value="'.$tag['aid'].'"'.(isset($_POST['tag']) && $tag['aid'] == $_POST['tag'] ? ' selected' : '').'>'.$tag['name'].' ('.$tag['addons'].')</tag>';
         }
-        return '<div style="width:100%;height:auto;overflow:hidden"><a style="display:block;float:left;background:rgba(0,0,0,0.2);border-radius:3px" href="https://github.com/Idrinth/WARAddonClient/releases/latest" taget="_blank">Client</a><a style="display:block;float:right;background:rgba(0,0,0,0.2);border-radius:3px" title="Add new Addon" href="/addons/new/">+</a></div><form method="post"><fieldset><legend>Filter Addons</legend>
-        <div><label for="name">Name similar to</label><input type="text" name="search" value="' . $_POST['search'] . '" id="name"/></div>
-        <div><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>
-        </fieldset><button type="submit">Filter Addons</button></form>
-        <table class="sorttable sortable"><thead><tr><th>Name</th><th>Version</th><th>Updated</th><th>Downloads</th><th>Endorsements</th></tr></thead><tbody>' . $content . '</tbody></table>';
+        return '<div class="searchField tag"><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>';
+    }
+
+    function getOverview() {
+        $content = '';
+
+        $q = "SELECT 
+        addon.id,
+        addon.name,
+        slug,
+        curVersion,
+        lastUpdate,
+        version.main AS main,
+        version.sub AS sub,
+        version.bug AS bug,
+        COUNT(*) as downloads,
+        (SELECT COUNT(*) FROM endorsement WHERE endorsement.addon = addon.id) as endorsements,
+        description.description as description,
+        GROUP_CONCAT( DISTINCT tag.name) as tags
+    FROM addon
+    LEFT JOIN download on download.addon=addon.id
+    LEFT JOIN (SELECT v1.addon, v1.main, v1.sub, v1.bug
+                FROM version v1
+                INNER JOIN (
+                    SELECT addon, MAX(tstamp) AS tstamp
+                    FROM version
+                    GROUP BY addon) AS v2
+                ON v1.addon = v2.addon AND v1.tstamp = v2.tstamp) AS version on addon.id = version.addon
+    LEFT JOIN description on addon.id = description.addon
+    LEFT JOIN addon_tag on addon.id = addon_tag.addon
+    LEFT JOIN tag on addon_tag.tag = tag.aid
+    WHERE addon.active
+    ".(isset($_POST['tag']) && $_POST['tag']!=0 && is_numeric($_POST['tag']) ? "AND addon.id IN (SELECT addon FROM addon_tag WHERE tag=".$_POST['tag'].")" : "")."
+" . (isset($_POST['search']) && strlen($_POST['search']) > 0?"AND lower(addon.name) LIKE '%" . $this->db->real_escape_string(mb_strtolower($_POST['search'])) . "%'":'') . "
+GROUP BY addon.id
+ORDER BY lastUpdate DESC,name ASC";
+        $res = $this->db->query($q);
+        if($res) {
+            $content .= '<div class="searchWrapper">';
+            $content .= '<div class="searchOptions">';
+            $content .= $this->getSortingOptions();
+            $content .= '</div>';
+            $content .= '<div class="searchResults" id="searchResults">';
+
+            if($res->num_rows <= 0) {
+                $content .= '<p class="placeholderResultText">No addons match your search terms.</p>';
+            }
+
+            while($item = $res->fetch_assoc()) {
+
+                $sortableData = [
+                    'name' => $item['name'],
+                    'downloads' => $item['downloads'],
+                    'endorsements' => $item['endorsements'],
+                    'lastUpdate' => $item['lastUpdate']
+                ];
+
+                $content .= '<div class="addonListing" data-addon="' . htmlspecialchars(json_encode($sortableData), ENT_QUOTES, 'UTF-8') .'">
+                                <div class="info">
+                                    <header><h3><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></h3>';
+                                    if(!empty($item['main'])) {
+                                        $content .= '<span class="version">v' . $item['curVersion'] . '</span>';
+                                    }
+                                    if(!empty($item['tags'])) {
+                                        $tags = explode(',', $item['tags']);
+                                        
+                                        foreach($tags as $tag) {
+                                            $content .= '<span class="tag">' . $tag . '</span>';
+                                        }
+                                    }
+                                    $content .= "</header>";
+                                    $content .= '<p class="addonMetaData">Updated ' . $this->humanTiming($item['lastUpdate']) . ' ago | 
+                                    ' . number_format($item['downloads']) . ' downloads | 
+                                    ' . number_format($item['endorsements']) . ' endorsements</p>
+                                    
+                                </div>';                                   
+                                    
+                                    if(!empty($item['main'])) {
+                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">
+                                            <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
+                                            Download
+                                        </a></div>';
+                                    }
+                            $content .= '</div>';
+            }
+            $content .= '</div>';
+            $content .= '</div>';
+        }
+        
+        return '<div>
+                    <a href="https://github.com/Idrinth/WARAddonClient/releases/latest" class="actionButton" taget="_blank">
+                        <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#box"/></svg>
+                        Get the Client
+                    </a>
+                    <a title="Add new Addon" href="/addons/new/" class="actionButton">
+                    <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#upload"/></svg>
+                        Upload an Addon
+                    </a>
+                    </div>
+        <form method="post" class="search">
+            ' . $this->getTagsDropDown() . '
+            <div class="searchField name">
+                <label for="name">Name similar to</label>
+                <input type="text" name="search" value="' . $_POST['search'] . '" id="name"/>
+            </div>
+            <div class="searchField button">
+                <button type="submit" class="actionButton" alt="search">
+                    <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#search"/></svg>
+                    Search Addons
+                </button>
+            </div>
+        </form>
+        '. $content;
     }
     function uploadFile($addon) {
         if(!$this->user->isActive()) {

@@ -1,2 +1,4 @@
 /nbproject/
+.vscode
 /config.php
+*.gzip.js

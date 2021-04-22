@@ -16,7 +16,7 @@ $descriptions = array(
     'addons' => 'A collection of UI-Addons for Warhammer-Online.',
 );
 if(empty($_SERVER['HTTP_HOST'])) {
-    $_SERVER['HTTP_HOST'] = 'tools.idrinth.de';
+    $_SERVER['HTTP_HOST'] = $GLOBALS['hostname'];
 }
 require_once __DIR__.'/config.php';
 require_once __DIR__ . '/classes/urlparser.php';
@@ -222,6 +222,20 @@ ini_set('display_errors',1);
     } else {
         $headers[] = 'Content-Length: 0';
         $headers[] = 'Content-Type: image/' . $ext;
+        $headers[] = 'Expires: ' . date('r');
+
+        $status = '404';
+    }
+} elseif($ext == 'svg') {
+    if(is_file('icons/' . $calledPage . '.' . $ext)) {
+        $headers[] = 'Last-Modified: ' . date('r',filemtime('icons/' . $calledPage . '.' . $ext));
+        $headers[] = 'Content-Length: ' . filesize('icons/' . $calledPage . '.' . $ext);
+        $headers[] = 'Content-Type: image/svg+xml';
+        $headers[] = 'Expires: ' . date('r',time() + 3000000);
+        $page = file_get_contents('icons/' . $calledPage . '.' . $ext);
+    } else {
+        $headers[] = 'Content-Length: 0';
+        $headers[] = 'Content-Type: text/' . $ext;
         $headers[] = 'Expires: ' . date('r');
 
         $status = '404';

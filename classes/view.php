@@ -104,8 +104,8 @@ class view {
                     $content .= '
             <item>
               <title>Version ' . $mainVersion . '.' . $subVersion . '.' . $bugVersion . '</title>
-              <guid>https://tools.idrinth.de/updates/#v' . $mainVersion . '-' . $subVersion . '-' . $bugVersion . '</guid>
-              <link>https://tools.idrinth.de/updates/#v' . $mainVersion . '-' . $subVersion . '-' . $bugVersion . '</link>
+              <guid>https://' . $GLOBALS['hostname'] . '/updates/#v' . $mainVersion . '-' . $subVersion . '-' . $bugVersion . '</guid>
+              <link>https://' . $GLOBALS['hostname'] . '/updates/#v' . $mainVersion . '-' . $subVersion . '-' . $bugVersion . '</link>
               <pubDate>' . date('r',strtotime($this->numberToDate($version['date']) . ' 00:00:00'
                             )) . '</pubDate>
               <description><![CDATA[<h2>Version ' . $mainVersion . '.' . $subVersion . '.' . $bugVersion . '</h2><ul>';
@@ -123,14 +123,14 @@ class view {
  <channel>
  <title>Updates RSS-Feed | Idrinth\'s Tools</title>
  <atom:link href="' . $self . '" rel="self" type="application/rss+xml" />
- <link>https://tools.idrinth.de</link>
+ <link>https://' . $GLOBALS['hostname'] . '</link>
  <description>' . $GLOBALS['descriptions'][''] . '</description>
  <language>en-gb</language>
  <pubDate>' . date('r',filemtime(__DIR__ . '/../ressources/updates.php')) . '</pubDate>
  <image>
  <title>Idrinth</title>
- <url>https://tools.idrinth.de/logo.png</url>
- <link>https://tools.idrinth.de</link>
+ <url>https://' . $GLOBALS['hostname'] . '/logo.png</url>
+ <link>https://' . $GLOBALS['hostname'] . '</link>
  </image>' . $content . '
                  </channel>
                  </rss>';
@@ -143,7 +143,7 @@ class view {
     protected function generateSidebar() {
         include __DIR__ . '/../ressources/updates.php';
         $content = '<div id="side-column">
-              <h2>last Updates</h2>
+              <h2>Last Updates</h2>
                             <ul>';
         $count = 0;
         foreach($updates as $mainVersion => $a1) {

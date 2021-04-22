@@ -22,7 +22,7 @@ class user {
       if($res) {
         $user = $res->fetch_assoc();
         if($user['id']) {
-          setcookie('iadb',$user['login'] . '|' . sha1($user['display'] . $user['pass']),time() + 2592000,'/','tools.idrinth.de');
+          setcookie('iadb',$user['login'] . '|' . sha1($user['display'] . $user['pass']),time() + 2592000,'/', $GLOBALS['hostname']);
         } else {
           $user = array();
         }
@@ -32,7 +32,7 @@ class user {
       if($res) {
         $user = $res->fetch_assoc();
         if($user&&$user['id']) {
-          setcookie('iadb',$user['login'] . '|' . sha1($user['display'] . $user['pass']),time() + 2592000,'/','tools.idrinth.de');
+          setcookie('iadb',$user['login'] . '|' . sha1($user['display'] . $user['pass']),time() + 2592000,'/', $GLOBALS['hostname']);
         }
       }
     }

@@ -1,4 +1,4 @@
-@charset "UTF-8"
+@charset "UTF-8";
 /*
 Document : print.css
 Created on : 04.08.2012, 19:56:14
@@ -25,13 +25,6 @@ input {
     border:none;
     color:#000000;
 }
-#inner-body-wrapper{
-    padding:5px 0;
-    min-width:100%;
-    max-width:100%;
-    width:100%;
-    background:#ffffff;
-}
 #following,
 #social,
 button,
@@ -39,7 +32,6 @@ input[type=button],
 input[type=submit],
 .link-to-button,
 #nav-wrapper,
-#footer-wrapper,
 #side-column {
     display:none
 }
@@ -65,13 +57,6 @@ input[type=submit],
     float:left;
     height:2em;
     width:auto;
-}
-#content-wrapper,
-#sidebar-wrapper {
-    padding: 0 2.5%;
-    float:none;
-    width:95%;
-    background:#ffffff;
 }
 #sidebar {
     font-size:75%;

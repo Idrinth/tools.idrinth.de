@@ -11,7 +11,7 @@ class urlparser {
     var $endedWithSlash = FALSE;
     function __construct($parts) {
         if(empty($_SERVER['HTTP_HOST'])) {
-            $_SERVER['HTTP_HOST'] = 'tools.idrinth.de';
+            $_SERVER['HTTP_HOST'] = $GLOBALS['hostname'];
         }
         $this->host = &$_SERVER['HTTP_HOST'];
         if(strpos($parts,'?') !== FALSE) {
@@ -21,7 +21,7 @@ class urlparser {
             $this->extension = substr($parts,strpos($parts,'.') + 1);
             $parts = substr($parts,0,strpos($parts,'.'));//removing the extension
         }
-        if($parts{strlen($parts) - 1} == '/') {
+        if($parts[strlen($parts) - 1] == '/') {
             $this->endedWithSlash = TRUE;
         }
         $parts = trim(mb_strtolower($parts),'/');//removing slashes
