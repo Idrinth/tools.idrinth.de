@@ -357,6 +357,17 @@ ORDER BY main DESC,sub DESC, bug DESC");
         return '<div class="searchField tag"><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>';
     }
 
+    function getEndorsementsAsArray() {
+        $data = [];
+        $res = $this->db->query("SELECT addon, COUNT(addon) as endorsements FROM `endorsement` WHERE endorsed = 1 GROUP BY addon");
+        if($res) {
+            while($item = $res->fetch_assoc()) {
+                $data[$item['addon']] = $item;
+            }
+        }
+        return $data;
+    }
+
     function getOverview() {
         $content = '';
 
@@ -367,7 +378,6 @@ ORDER BY main DESC,sub DESC, bug DESC");
         curVersion,
         lastUpdate,
         COUNT(*) as downloads,
-        (SELECT COUNT(*) FROM endorsement WHERE endorsement.addon = addon.id) as endorsements,
         description.description as description,
         GROUP_CONCAT( DISTINCT tag.name) as tags
     FROM addon
@@ -392,12 +402,19 @@ ORDER BY lastUpdate DESC,name ASC";
                 $content .= '<p class="placeholderResultText">No addons match your search terms.</p>';
             }
 
+            $endorsementData = $this->getEndorsementsAsArray();
+
             while($item = $res->fetch_assoc()) {
+
+                $endorsements = 0;
+                if( $endorsementData && $endorsementData[$item['id']]) {
+                    $endorsements = $endorsementData[$item['id']]['endorsements'];
+                }
 
                 $sortableData = [
                     'name' => $item['name'],
                     'downloads' => $item['downloads'],
-                    'endorsements' => $item['endorsements'],
+                    'endorsements' => $endorsements,
                     'lastUpdate' => $item['lastUpdate']
                 ];
 
@@ -417,7 +434,7 @@ ORDER BY lastUpdate DESC,name ASC";
                                     $content .= "</header>";
                                     $content .= '<p class="addonMetaData">Updated ' . $this->humanTiming($item['lastUpdate']) . ' ago | 
                                     ' . number_format($item['downloads']) . ' downloads | 
-                                    ' . number_format($item['endorsements']) . ' endorsements</p>
+                                    ' . number_format($endorsements) . ' endorsements</p>
                                     
                                 </div>';                                   
                                     
