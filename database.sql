@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS `download` (
   `useragent` varchar(250) DEFAULT NULL,
   `datetime` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `user` (`user`,`version`)
+  KEY `user` (`user`,`version`),
+  KEY `addon` (`addon`)
 ) ENGINE=MyISAM AUTO_INCREMENT=430151 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `endorsement` (
