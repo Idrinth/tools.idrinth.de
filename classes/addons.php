@@ -357,6 +357,17 @@ ORDER BY main DESC,sub DESC, bug DESC");
         return '<div class="searchField tag"><label for="tag">Tagged as</label><select name="tag" id="tag">'.$options.'</select></div>';
     }
 
+    function getEndorsementsAsArray() {
+        $data = [];
+        $res = $this->db->query("SELECT addon, COUNT(addon) as endorsements FROM `endorsement` WHERE endorsed = 1 GROUP BY addon");
+        if($res) {
+            while($item = $res->fetch_assoc()) {
+                $data[$item['addon']] = $item;
+            }
+        }
+        return $data;
+    }
+
     function getOverview() {
         $content = '';
 
@@ -366,22 +377,11 @@ ORDER BY main DESC,sub DESC, bug DESC");
         slug,
         curVersion,
         lastUpdate,
-        version.main AS main,
-        version.sub AS sub,
-        version.bug AS bug,
         COUNT(*) as downloads,
-        (SELECT COUNT(*) FROM endorsement WHERE endorsement.addon = addon.id) as endorsements,
         description.description as description,
         GROUP_CONCAT( DISTINCT tag.name) as tags
     FROM addon
     LEFT JOIN download on download.addon=addon.id
-    LEFT JOIN (SELECT v1.addon, v1.main, v1.sub, v1.bug
-                FROM version v1
-                INNER JOIN (
-                    SELECT addon, MAX(tstamp) AS tstamp
-                    FROM version
-                    GROUP BY addon) AS v2
-                ON v1.addon = v2.addon AND v1.tstamp = v2.tstamp) AS version on addon.id = version.addon
     LEFT JOIN description on addon.id = description.addon
     LEFT JOIN addon_tag on addon.id = addon_tag.addon
     LEFT JOIN tag on addon_tag.tag = tag.aid
@@ -402,19 +402,26 @@ ORDER BY lastUpdate DESC,name ASC";
                 $content .= '<p class="placeholderResultText">No addons match your search terms.</p>';
             }
 
+            $endorsementData = $this->getEndorsementsAsArray();
+
             while($item = $res->fetch_assoc()) {
+
+                $endorsements = 0;
+                if( $endorsementData && $endorsementData[$item['id']]) {
+                    $endorsements = $endorsementData[$item['id']]['endorsements'];
+                }
 
                 $sortableData = [
                     'name' => $item['name'],
                     'downloads' => $item['downloads'],
-                    'endorsements' => $item['endorsements'],
+                    'endorsements' => $endorsements,
                     'lastUpdate' => $item['lastUpdate']
                 ];
 
                 $content .= '<div class="addonListing" data-addon="' . htmlspecialchars(json_encode($sortableData), ENT_QUOTES, 'UTF-8') .'">
                                 <div class="info">
                                     <header><h3><a href="/addons/' . $item['slug'] . '/">' . $item['name'] . '</a></h3>';
-                                    if(!empty($item['main'])) {
+                                    if(!empty($item['curVersion'])) {
                                         $content .= '<span class="version">v' . $item['curVersion'] . '</span>';
                                     }
                                     if(!empty($item['tags'])) {
@@ -427,12 +434,12 @@ ORDER BY lastUpdate DESC,name ASC";
                                     $content .= "</header>";
                                     $content .= '<p class="addonMetaData">Updated ' . $this->humanTiming($item['lastUpdate']) . ' ago | 
                                     ' . number_format($item['downloads']) . ' downloads | 
-                                    ' . number_format($item['endorsements']) . ' endorsements</p>
+                                    ' . number_format($endorsements) . ' endorsements</p>
                                     
                                 </div>';                                   
                                     
-                                    if(!empty($item['main'])) {
-                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">
+                                    if(!empty($item['curVersion'])) {
+                                        $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . str_replace('.', '-', $item['curVersion']) . '/">
                                             <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
                                             Download
                                         </a></div>';
