@@ -377,11 +377,10 @@ ORDER BY main DESC,sub DESC, bug DESC");
         slug,
         curVersion,
         lastUpdate,
-        COUNT(*) as downloads,
+        (SELECT COUNT(*) FROM download WHERE download.addon=addon.id) as downloads,
         description.description as description,
         GROUP_CONCAT( DISTINCT tag.name) as tags
     FROM addon
-    LEFT JOIN download on download.addon=addon.id
     LEFT JOIN description on addon.id = description.addon
     LEFT JOIN addon_tag on addon.id = addon_tag.addon
     LEFT JOIN tag on addon_tag.tag = tag.aid
