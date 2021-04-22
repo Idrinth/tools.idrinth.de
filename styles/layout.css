@@ -635,3 +635,8 @@ span.tag {
 .formRow input {
   width: 250px;
 }
+.bmc-btn-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
