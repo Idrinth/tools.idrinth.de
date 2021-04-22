@@ -1,6 +1,15 @@
 <?php
 $updates = array(
     1 => array(
+        20 => array(
+            0 => array(
+                'date' => 20210422,
+                'categories' => array(),
+                'descriptions' => array(
+                    'Mayor UI Overhault by <a href="https://github.com/Hecksa" target="_blank">Hecksa</a>',
+                ),
+            )
+        ),
         19 => array(
             0 => array(
                 'date' => 20210113,

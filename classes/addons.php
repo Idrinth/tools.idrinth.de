@@ -434,10 +434,6 @@ ORDER BY lastUpdate DESC,name ASC";
         }
         
         return '<div>
-                    <a href="https://github.com/Idrinth/WARAddonClient/releases/latest" class="actionButton" taget="_blank">
-                        <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#box"/></svg>
-                        Get the Client
-                    </a>
                     <a title="Add new Addon" href="/addons/new/" class="actionButton">
                     <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#upload"/></svg>
                         Upload an Addon
