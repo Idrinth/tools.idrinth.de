@@ -1,6 +1,17 @@
 <?php
 $updates = array(
     1 => array(
+        21 => array(
+            0 => array(
+                'date' => 202104224,
+                'categories' => array(
+                    'addons'
+                ),
+                'descriptions' => array(
+                    'Adding a download latest button',
+                ),
+            )
+        ),
         20 => array(
             0 => array(
                 'date' => 20210422,
