@@ -135,7 +135,7 @@ class addons {
         $content .= $this->getEndorseButton($res && $res->fetch_assoc()['endorsed']);
             
         $content .= '<table><thead><tr><th>Version</th><th>Status</th><th>Changes</th><th>Uploader</th><th>Downloads</th></tr></thead><tbody>';
-        $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(*) as downloads
+        $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(download.id) as downloads
 FROM version
 INNER JOIN user ON user.id=version.author
 LEFT JOIN download ON download.version=version.id
