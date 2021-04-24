@@ -45,13 +45,23 @@ class addons {
         return $view->generateStaticPage($page . $this->makeComments(),$pageTitle);
     }
     function downloadAddon($slug,$version) {
-        $res = $this->db->query("SELECT version.data,version.id,version.addon FROM `version`
-            INNER JOIN addon ON version.addon=addon.id
-            WHERE addon.slug='" . $this->db->real_escape_string($slug) . "'
-            AND NOT version.disabled
-            AND version.main=" . intval(explode('-',$version)[0]) . "
-            AND version.sub=" . intval(explode('-',$version)[1]) . "
-            ANd version.bug=" . intval(explode('-',$version)[2]));
+        $res = false;
+        if ($version === 'latest') {
+            $res = $this->db->query("SELECT version.data,version.id,version.addon FROM `version`
+                INNER JOIN addon ON version.addon=addon.id
+                WHERE addon.slug='" . $this->db->real_escape_string($slug) . "'
+                AND NOT version.disabled
+                ORDER BY version.main DESC, version.sub DESC, version.bug DESC
+                LIMIT 1");
+        } else {
+            $res = $this->db->query("SELECT version.data,version.id,version.addon FROM `version`
+                INNER JOIN addon ON version.addon=addon.id
+                WHERE addon.slug='" . $this->db->real_escape_string($slug) . "'
+                AND NOT version.disabled
+                AND version.main=" . intval(explode('-',$version)[0]) . "
+                AND version.sub=" . intval(explode('-',$version)[1]) . "
+                ANd version.bug=" . intval(explode('-',$version)[2]));
+        }
         if($res) {
             list($data,$id,$addon) = $res->fetch_row();
             if($data) {
@@ -152,7 +162,10 @@ ORDER BY main DESC,sub DESC, bug DESC");
                 Upload new version
             </a>';
         }
-
+        $content .= '<a rel="nofollow" class="actionButton" href="addons/' . $addon['slug'] . '/download/latest/">
+                <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
+                Download Latest
+            </a>';
         return $content;
     }
     function getAddon($slug) {
