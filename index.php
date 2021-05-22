@@ -156,15 +156,15 @@ if($ext === '' || $ext === 'htm' || $ext === 'html' || $ext === 'php' || $ext ==
         $addons = new addonApi();
         $page = $addons->getPage($GLOBALS['parser']->getPage(1));
         $headers[] = 'Expires: ' . date('r',time() + 1);
-    } elseif($calledPage == 'scenarios') {
+    } elseif($calledPage == 'addon-api2') {
         if($ext != '' || $cPageOrig != '/') {
             $status = '301';
         }
-ini_set('display_errors',1);
-        require_once('classes/Szenarios.php');
+        ini_set('display_errors',1);
+        require_once('classes/addonApi2.php');
         $ext = '/';
         $GLOBALS['canonical'] = str_replace('//','/',$GLOBALS['canonical'] . $calledPage . $ext);
-        $addons = new Scenarios();
+        $addons = new addonApi2();
         $page = $addons->getPage($GLOBALS['parser']->getPage(1));
         $headers[] = 'Expires: ' . date('r',time() + 1);
     } else {

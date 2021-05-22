@@ -3,7 +3,18 @@ $updates = array(
     1 => array(
         21 => array(
             0 => array(
-                'date' => 202104224,
+                'date' => 20210522,
+                'categories' => array(
+                    'addons'
+                ),
+                'descriptions' => array(
+                    'Providing a new, less annoying api',
+                ),
+            )
+        ),
+        21 => array(
+            0 => array(
+                'date' => 20210424,
                 'categories' => array(
                     'addons'
                 ),
