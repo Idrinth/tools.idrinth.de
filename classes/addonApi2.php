@@ -28,7 +28,7 @@ class addonApi2{
 
     function getPage($addon = '') {
       if ($addon) {
-          $res  = $this->db->query ("SELECT description.description,description_fr.description As description_fr,description_de.description AS description_de
+          $res  = $this->db->query("SELECT description.description,description_fr.description As description_fr,description_de.description AS description_de
               FROM addon
         LEFT JOIN description ON description.addon=addon.id AND description.active AND description.lang='en'
         LEFT JOIN description AS description_fr ON description_fr.addon=addon.id AND description_fr.active AND description_fr.lang='fr'
@@ -36,12 +36,13 @@ class addonApi2{
         WHERE addon.slug='".$this->db->escape_string($addon)."'");
           $data = $res->fetch_assoc();
           $data['versions'] = array();
-          $res2 = $this->db->query ("SELECT CONCAT(version.main, ".", version.sub, ".", version.bug) AS version, version.`change`
+          $res2 = $this->db->query("SELECT CONCAT(version.main, '.', version.sub, '.', version.bug) AS version, version.`change`,user.display,version.tstamp
               FROM addon
         LEFT JOIN version ON version.addon = addon.id
+        INNER JOIN user ON user.id=version.author
         WHERE addon.slug='".$this->db->escape_string($addon)."'");
           while ($row = $res2->fetch_assoc()) {
-              $data['versions'][$row['version']] = $row['change'];
+              $data['versions'][] = $row;
           }
           return json_encode($data);
       }
