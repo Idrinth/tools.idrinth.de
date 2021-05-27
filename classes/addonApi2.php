@@ -40,7 +40,8 @@ class addonApi2{
               FROM addon
         LEFT JOIN version ON version.addon = addon.id
         INNER JOIN user ON user.id=version.author
-        WHERE addon.slug='".$this->db->escape_string($addon)."'");
+        WHERE addon.slug='".$this->db->escape_string($addon)."'
+        ORDER BY main DESC,sub DESC, bug DESC");
           while ($row = $res2->fetch_assoc()) {
               $data['versions'][] = $row;
           }
