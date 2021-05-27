@@ -28,15 +28,21 @@ class addonApi2{
 
     function getPage($addon = '') {
       if ($addon) {
-          $res  = $this->db->query ("SELECT description.description,description_fr.description As description_fr,description_de.description AS description_de, GROUP_CONCAT(CONCAT(version.main, '.', version.sub, '.', version.bug)) AS versions
+          $res  = $this->db->query ("SELECT description.description,description_fr.description As description_fr,description_de.description AS description_de
               FROM addon
         LEFT JOIN description ON description.addon=addon.id AND description.active AND description.lang='en'
         LEFT JOIN description AS description_fr ON description_fr.addon=addon.id AND description_fr.active AND description_fr.lang='fr'
         LEFT JOIN description As description_de ON description_de.addon=addon.id AND description_de.active AND description_de.lang='de'
-        LEFT JOIN version ON version.addon = addon.id
         WHERE addon.slug='".$this->db->escape_string($addon)."'");
           $data = $res->fetch_assoc();
-          $data['versions'] = explode(",", $data['versions']);
+          $data['versions'] = array();
+          $res2 = $this->db->query ("SELECT CONCAT(version.main, ".", version.sub, ".", version.bug) AS version, version.`change`
+              FROM addon
+        LEFT JOIN version ON version.addon = addon.id
+        WHERE addon.slug='".$this->db->escape_string($addon)."'");
+          while ($row = $res2->fetch_assoc()) {
+              $data['versions'][$row['version']] = $row['change'];
+          }
           return json_encode($data);
       }
       $res = $this->db->query("SELECT addon.name,addon.slug,addon.curVersion AS version,GROUP_CONCAT(tag.name) AS tags,
