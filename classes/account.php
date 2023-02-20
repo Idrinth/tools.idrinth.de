@@ -157,6 +157,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         return mail($mail,$topic,'<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
    <title>' . $topic . '</title></head><body>' . $text . '</body></html>',"From: Idrinth's Tools (idrinth) <tools@idrinth.de>\r\n" .
                 "X-Mailer: PHP\r\n" .
+                "Reply-To: Idrinth's Tickets (idrinth) <ticket@idrinth.de>\r\n" .
                 "MIME-Version: 1.0\r\n" .
                 "Content-Type: text/html; charset=utf-8\r\n" .
                 "Content-Transfer-Encoding: 8bit\r\n");
