@@ -155,9 +155,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
             return FALSE;
         }
         return mail($mail,$topic,'<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-   <title>' . $topic . '</title></head><body>' . $text . '</body></html>',"From: Idrinth's Tool <tools@idrinth.de>\r\n" .
-                "Reply-To: webmaster@idrinth.de\r\n" .
-                "BCC: webmaster@idrinth.de\r\n" .
+   <title>' . $topic . '</title></head><body>' . $text . '</body></html>',"From: Idrinth's Tools (idrinth) <tools@idrinth.de>\r\n" .
                 "X-Mailer: PHP\r\n" .
                 "MIME-Version: 1.0\r\n" .
                 "Content-Type: text/html; charset=utf-8\r\n" .
