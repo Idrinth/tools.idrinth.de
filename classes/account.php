@@ -151,6 +151,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         return $this->sendMail($_POST['email'],$text,'Registration at Idrinth\'s Tools');
     }
     function sendMail($mail,$text,$topic) {
+        return false;
         if(filter_var($mail,FILTER_VALIDATE_EMAIL) === FALSE) {
             return FALSE;
         }
