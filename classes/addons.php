@@ -60,9 +60,9 @@ class addons {
                 AND NOT version.disabled
                 AND version.main=" . intval(explode('-',$version)[0]) . "
                 AND version.sub=" . intval(explode('-',$version)[1]) . "
-                ANd version.bug=" . intval(explode('-',$version)[2]));
+                AND version.bug=" . intval(explode('-',$version)[2]));
         }
-        if($res) {
+        if($res && $res->num_rows) {
             list($data,$id,$addon) = $res->fetch_row();
             if($data) {
                 header("Pragma: public");
@@ -79,21 +79,21 @@ class addons {
                 exit;
             }
         }
-        header('Location /addons/' . $slug . '/');
+        header('Location: /addons/' . $slug . '/');
         exit;
     }
     function makeDescriptions($addon) {
         $content = '<script src="tabs.js"></script><ul class="tab-menu"><li onclick="activateTab(0,this.parentNode);" class="active">English</li><li onclick="activateTab(1,this.parentNode);">Français</li><li onclick="activateTab(2,this.parentNode);">Deutsch</li></ul><div class="tabs">';
         foreach(array("en","fr","de") AS $lang) {
-            $description = array();
+            $description = array('description' => '', 'date' => 0, 'display' => '');
             $res = $this->db->query("SELECT description,`date`,display FROM description INNER JOIN `user` ON `user`.id=description.author WHERE active AND lang='$lang' AND addon=" . $this->id);
             if($res) {
-                $description = $res->fetch_assoc();
+                $description = $res->fetch_assoc() ?? $description;
             }
             $content.='<div class="tab" data-name="' . $lang . '"><a href="addons/' . $addon['slug'] . '/edit/' . $lang . '/">Edit</a>'
                     . '<p style="font-size:75%">Please remember to keep info in regards to HOW an addon works, what it SHOULD do in the description and all temporary things(doesn\'t work now etc.) in the comments.</p>'
                     . '<div class="description">' . $description['description']
-                    . ($addon['date'] > 0?'<footer>last updated: ' . date('r',$description['date']) . ' | written by: ' . $addon['display'] . '</footer>':'')
+                    . ($description['date'] > 0?'<footer>last updated: ' . date('r',$description['date']) . ' | written by: ' . $addon['display'] . '</footer>':'')
                     . '</div></div>';
         }
         return str_replace('data-name="en"','style="display:block;" data-name="en"',$content) . '</div>';
@@ -120,20 +120,20 @@ class addons {
             $tagMarkup = '';
             $tagString = $res->fetch_row()[0];
             if(!empty($tagString)) {
-                $tags = explode(',', $tagString);                                        
+                $tags = explode(',', $tagString);
                 foreach($tags as $tag) {
                     $tagMarkup .= '<span class="tag">' . $tag . '</span>';
-                }   
+                }
             }
         }
-        $content .= '<div class="tags">' . $tagMarkup . '</div>' . $this->makeDescriptions($addon);
+        $content = '<div class="tags">' . $tagMarkup . '</div>' . $this->makeDescriptions($addon);
         if (isset($_POST['endorsement']) && $this->user->isActive()) {
             $this->db->query("INSERT INTO endorsement (user, addon, endorsed) VALUES (".$this->user->id.",".$addon['id'].",".(intval($_POST['endorsement'])?1:0).") ON DUPLICATE KEY UPDATE endorsed=".(intval($_POST['endorsement'])?1:0));
         }
         $res = $this->db->query("SELECT endorsed FROM endorsement WHERE user=".$this->user->id." AND addon=".$addon['id']);
-        
-        $content .= $this->getEndorseButton($res && $res->fetch_assoc()['endorsed']);
-            
+        if ($res) {
+            $content .= $this->getEndorseButton(($res->fetch_assoc()??[])['endorsed']??0);
+        }
         $content .= '<table><thead><tr><th>Version</th><th>Status</th><th>Changes</th><th>Uploader</th><th>Downloads</th></tr></thead><tbody>';
         $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(download.id) as downloads
 FROM version
@@ -327,7 +327,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
     function humanTiming($time)
     {
 
-        $time = time() - $time; 
+        $time = time() - $time;
         $time = ($time<1)? 1 : $time;
         $tokens = array (
             31536000 => 'year',
@@ -384,7 +384,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
     function getOverview() {
         $content = '';
 
-        $q = "SELECT 
+        $q = "SELECT
         addon.id,
         addon.name,
         slug,
@@ -419,7 +419,7 @@ ORDER BY lastUpdate DESC,name ASC";
             while($item = $res->fetch_assoc()) {
 
                 $endorsements = 0;
-                if( $endorsementData && $endorsementData[$item['id']]) {
+                if( $endorsementData && isset($endorsementData[$item['id']])) {
                     $endorsements = $endorsementData[$item['id']]['endorsements'];
                 }
 
@@ -438,18 +438,18 @@ ORDER BY lastUpdate DESC,name ASC";
                                     }
                                     if(!empty($item['tags'])) {
                                         $tags = explode(',', $item['tags']);
-                                        
+
                                         foreach($tags as $tag) {
                                             $content .= '<span class="tag">' . $tag . '</span>';
                                         }
                                     }
                                     $content .= "</header>";
-                                    $content .= '<p class="addonMetaData">Updated ' . $this->humanTiming($item['lastUpdate']) . ' ago | 
-                                    ' . number_format($item['downloads']) . ' downloads | 
+                                    $content .= '<p class="addonMetaData">Updated ' . $this->humanTiming($item['lastUpdate']) . ' ago |
+                                    ' . number_format($item['downloads']) . ' downloads |
                                     ' . number_format($endorsements) . ' endorsements</p>
-                                    
-                                </div>';                                   
-                                    
+
+                                </div>';
+
                                     if(!empty($item['curVersion'])) {
                                         $content .= '<div class="actions"><a rel="nofollow" class="actionButton" href="addons/' . $item['slug'] . '/download/' . str_replace('.', '-', $item['curVersion']) . '/">
                                             <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#download"/></svg>
@@ -461,7 +461,7 @@ ORDER BY lastUpdate DESC,name ASC";
             $content .= '</div>';
             $content .= '</div>';
         }
-        
+
         return '<div>
                     <a title="Add new Addon" href="/addons/new/" class="actionButton">
                     <svg class="icon"><use xlink:href="https://'. $GLOBALS['hostname'] .'/feather-sprite.svg#upload"/></svg>
@@ -472,7 +472,7 @@ ORDER BY lastUpdate DESC,name ASC";
             ' . $this->getTagsDropDown() . '
             <div class="searchField name">
                 <label for="name">Name similar to</label>
-                <input type="text" name="search" value="' . $_POST['search'] . '" id="name"/>
+                <input type="text" name="search" value="' . ($_POST['search']??'') . '" id="name"/>
             </div>
             <div class="searchField button">
                 <button type="submit" class="actionButton" alt="search">
@@ -488,7 +488,7 @@ ORDER BY lastUpdate DESC,name ASC";
             return 'No Access without login';
         }
         if(isset($_POST['main']) && isset($_POST['sub']) && isset($_POST['bug']) && isset($_POST['status']) && isset($_FILES['data'])) {
-            $this->db->query("INSERT INTO version (main,sub,bug,addon,author,`status`,`change`,ip,tstamp,`data`) VALUES ("
+            $this->db->query("INSERT INTO version (main,sub,bug,addon,author,`status`,`change`,ip,tstamp,`data`,disabled) VALUES ("
                     . intval($_POST['main']) . ","
                     . intval($_POST['sub']) . ","
                     . intval($_POST['bug']) . ","
@@ -498,8 +498,8 @@ ORDER BY lastUpdate DESC,name ASC";
                     . "'" . $this->db->real_escape_string($_POST['change']) . "',"
                     . "'" . $this->db->real_escape_string($_SERVER['REMOTE_ADDR']) . "',"
                     . time() . ","
-                    . "'" . $this->db->real_escape_string(file_get_contents($_FILES['data']['tmp_name'])) . "'"
-                    . ")");
+                    . "'" . $this->db->real_escape_string(file_get_contents($_FILES['data']['tmp_name'])) . "',"
+                    . "0)");
             $this->db->query("INSERT INTO addon (id,curVersion,lastUpdate)
                     (SELECT addon,CONCAT(main,'.',sub,'.',bug),tstamp FROM version WHERE addon=" . $this->id . " ORDER BY main DESC,sub DESC,bug DESC LIMIT 1)
                     ON DUPLICATE KEY UPDATE curVersion=VALUES(curVersion),lastUpdate=VALUES(lastUpdate)");
