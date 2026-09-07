@@ -93,7 +93,7 @@ class addons {
             $content.='<div class="tab" data-name="' . $lang . '"><a href="addons/' . $addon['slug'] . '/edit/' . $lang . '/">Edit</a>'
                     . '<p style="font-size:75%">Please remember to keep info in regards to HOW an addon works, what it SHOULD do in the description and all temporary things(doesn\'t work now etc.) in the comments.</p>'
                     . '<div class="description">' . $description['description']
-                    . ($description['date'] > 0?'<footer>last updated: ' . date('r',$description['date']) . ' | written by: ' . $addon['display'] . '</footer>':'')
+                    . ($description['date'] > 0?'<footer>last updated: ' . date('r',$description['date']) . ' | written by: ' . ($addon['display'] ?? '') . '</footer>':'')
                     . '</div></div>';
         }
         return str_replace('data-name="en"','style="display:block;" data-name="en"',$content) . '</div>';
