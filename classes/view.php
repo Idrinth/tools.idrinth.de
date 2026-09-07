@@ -293,7 +293,7 @@ class view {
         $markers['content'] = $content;
         $markers['baseURL'] = 'https://' . $_SERVER['HTTP_HOST'];
         $markers['calculator'] = 'updates';
-        $markers['version'] .= '<li>Calculator Core v' . combatCalculations::$version . '</li>';
+        $markers['version'] = '<li>Calculator Core v' . combatCalculations::$version . '</li>';
         $markers['sidebar'] = $this->generateSidebar();
         $markers['styles'] = '<link href="layout.css" rel="stylesheet" type="text/css" />';
         $markers['head-js'] = '';
