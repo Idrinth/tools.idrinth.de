@@ -178,7 +178,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
         }
         $addon = $res->fetch_assoc();
         $res->free();
-        if(!$addon['name']) {
+        if(!$add0n ||!$addon['name']) {
             header("Location: https://" . $GLOBALS['hostname'] . "/addons/");
             exit;
         }
