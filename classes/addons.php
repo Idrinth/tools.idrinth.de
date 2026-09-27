@@ -483,35 +483,67 @@ ORDER BY lastUpdate DESC,name ASC";
         </form>
         '. $content;
     }
+    function isZipUpload($file) {
+        if(!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name']) || filesize($file['tmp_name']) <= 0) {
+            return false;
+        }
+        if(strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) !== 'zip') {
+            return false;
+        }
+        $handle = fopen($file['tmp_name'], 'rb');
+        if(!$handle) {
+            return false;
+        }
+        $magic = fread($handle, 4);
+        fclose($handle);
+        if($magic !== "PK\x03\x04" && $magic !== "PK\x05\x06" && $magic !== "PK\x07\x08") {
+            return false;
+        }
+        if(class_exists('ZipArchive')) {
+            $zip = new ZipArchive();
+            $opened = $zip->open($file['tmp_name']);
+            if($opened !== true) {
+                return false;
+            }
+            $zip->close();
+        }
+        return true;
+    }
     function uploadFile($addon) {
         if(!$this->user->isActive()) {
             return 'No Access without login';
         }
+        $error = '';
         if(isset($_POST['main']) && isset($_POST['sub']) && isset($_POST['bug']) && isset($_POST['status']) && isset($_FILES['data'])) {
-            $this->db->query("INSERT INTO version (main,sub,bug,addon,author,`status`,`change`,ip,tstamp,`data`,disabled) VALUES ("
-                    . intval($_POST['main']) . ","
-                    . intval($_POST['sub']) . ","
-                    . intval($_POST['bug']) . ","
-                    . $this->id . ","
-                    . $this->user->id . ","
-                    . intval($_POST['status']) . ","
-                    . "'" . $this->db->real_escape_string($_POST['change']) . "',"
-                    . "'" . $this->db->real_escape_string($_SERVER['REMOTE_ADDR']) . "',"
-                    . time() . ","
-                    . "'" . $this->db->real_escape_string(file_get_contents($_FILES['data']['tmp_name'])) . "',"
-                    . "0)");
-            $this->db->query("INSERT INTO addon (id,curVersion,lastUpdate)
-                    (SELECT addon,CONCAT(main,'.',sub,'.',bug),tstamp FROM version WHERE addon=" . $this->id . " ORDER BY main DESC,sub DESC,bug DESC LIMIT 1)
-                    ON DUPLICATE KEY UPDATE curVersion=VALUES(curVersion),lastUpdate=VALUES(lastUpdate)");
-            header('Location: /addons/' . $addon['slug'] . '/',302);
-            exit;
+            if(!$this->isZipUpload($_FILES['data'])) {
+                $error = 'Please select a valid ZIP file to upload.';
+            } else {
+                $this->db->query("INSERT INTO version (main,sub,bug,addon,author,`status`,`change`,ip,tstamp,`data`,disabled) VALUES ("
+                        . intval($_POST['main']) . ","
+                        . intval($_POST['sub']) . ","
+                        . intval($_POST['bug']) . ","
+                        . $this->id . ","
+                        . $this->user->id . ","
+                        . intval($_POST['status']) . ","
+                        . "'" . $this->db->real_escape_string($_POST['change']) . "',"
+                        . "'" . $this->db->real_escape_string($_SERVER['REMOTE_ADDR']) . "',"
+                        . time() . ","
+                        . "'" . $this->db->real_escape_string(file_get_contents($_FILES['data']['tmp_name'])) . "',"
+                        . "0)");
+                $this->db->query("INSERT INTO addon (id,curVersion,lastUpdate)
+                        (SELECT addon,CONCAT(main,'.',sub,'.',bug),tstamp FROM version WHERE addon=" . $this->id . " ORDER BY main DESC,sub DESC,bug DESC LIMIT 1)
+                        ON DUPLICATE KEY UPDATE curVersion=VALUES(curVersion),lastUpdate=VALUES(lastUpdate)");
+                header('Location: /addons/' . $addon['slug'] . '/',302);
+                exit;
+            }
         }
         $res = $this->db->query("SELECT CONCAT(main,'.',sub,'.',bug) FROM version WHERE addon=" . $this->id);
         $content = array();
         while($item = $res->fetch_row()) {
             $content[] = $item[0];
         }
-        return '<p>Known Versions: ' . implode(', ',$content) . '</p>
+        $errorMarkup = $error ? '<p class="error">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>' : '';
+        return $errorMarkup . '<p>Known Versions: ' . implode(', ',$content) . '</p>
             <p><a href="http://semver.org/">Versioning Info</a></p>
 <form method="post" enctype="multipart/form-data">
     <div><label for="data">Select Zip-File to upload:</label><input accept="application/zip,.zip" required type="file" name="data" id="data"></div>
@@ -537,8 +569,7 @@ ORDER BY lastUpdate DESC,name ASC";
         if(isset($_POST['submit'])) {
             $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9_\-]+/','-',$name), '-'));
             $file = $_FILES['data'] ?? null;
-            $validFile = $file && $file['error'] === UPLOAD_ERR_OK && is_uploaded_file($file['tmp_name'])
-                    && filesize($file['tmp_name']) > 0 && strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) === 'zip';
+            $validFile = $this->isZipUpload($file);
             if($name === '' || $slug === '' || !ctype_digit((string)$main) || !ctype_digit((string)$sub)
                     || !ctype_digit((string)$bug) || !in_array((string)$status, array('0','1','2'), true) || !$validFile) {
                 $error = 'Please enter a name and valid version details, and select a ZIP file to upload.';
