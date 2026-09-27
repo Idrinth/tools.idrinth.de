@@ -193,6 +193,7 @@ if($ext === '' || $ext === 'htm' || $ext === 'html' || $ext === 'php' || $ext ==
         $headers[] = 'Expires: ' . date('r',time() + 100000);
     }
     $page = str_replace('###ACCOUNT###',$GLOBALS['user']->loggedIn?'Profile':'Login',$page);
+        $page = str_replace('###LOGOUT###',$GLOBALS['user']->loggedIn?'<li><a href="/account/logout/" title="Log out">Logout</a></li>':'',$page);
     $page = str_replace('###canonical###','<link rel="canonical" href="https://' . $GLOBALS['parser']->getCanonical($ext) . '" />',$page);
     $page = str_replace('###description###','<meta name="description" content="' . (isset($descriptions[$calledPage])?$descriptions[$calledPage]:'') . '" />',$page);
     if($canGZip) {
