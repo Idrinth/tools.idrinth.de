@@ -270,6 +270,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         }
         $res->free();
         $content = '';
+        $display = htmlspecialchars($user['display'], ENT_QUOTES, 'UTF-8');
         if($own) {
             if(isset($_POST['pw-o']) && isset($_POST['pw-o']) && $_POST['pw-o'] && $_POST['pw-o']) {
                 $this->db->query("UPDATE user "
@@ -301,7 +302,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
                 unset($im);
             }
         }
-        $content .= '<img class="left" title="' . $user['display'] . '" alt="' . $user['display'] . '" src="' .
+        $content .= '<img class="left" title="' . $display . '" alt="' . $display . '" src="' .
                 (is_file($_SERVER['DOCUMENT_ROOT'] . '/img/profile/' . $user['slug'] . '.png')?'/img/profile/' . $user['slug'] . '.png':'/img/profile/default.png') . '"/>';
         if($own) {
             $content.='<form method="post" enctype="multipart/form-data">';
@@ -314,7 +315,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
             $content.='<form method="post">';
         }
         $content .= '<table class="account-table right"><tbody>';
-        $content .= '<tr><th>Display Name</th><td>' . $user['display'] . '</td></tr>';
+        $content .= '<tr><th>Display Name</th><td>' . $display . '</td></tr>';
         $content .= ($user['admin']?'<tr style="color:#00ff00"><th>Admin</th><td>Yes</td></tr>':'');
         $content .= ($user['banned']?'<tr style="color:#ff0000"><th>Banned</th><td>Yes</td></tr>':'');
         $content .= '<tr><th>Current Points</th><td>' . number_format($user['points'],0,'.',',') . '</td></tr>';

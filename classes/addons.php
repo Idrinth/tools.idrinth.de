@@ -93,7 +93,7 @@ class addons {
             $content.='<div class="tab" data-name="' . $lang . '"><a href="addons/' . $addon['slug'] . '/edit/' . $lang . '/">Edit</a>'
                     . '<p style="font-size:75%">Please remember to keep info in regards to HOW an addon works, what it SHOULD do in the description and all temporary things(doesn\'t work now etc.) in the comments.</p>'
                     . '<div class="description">' . $description['description']
-                    . ($description['date'] > 0?'<footer>last updated: ' . date('r',$description['date']) . ' | written by: ' . ($addon['display'] ?? '') . '</footer>':'')
+                    . ($description['date'] > 0?'<footer>last updated: ' . date('r',$description['date']) . ' | written by: ' . htmlspecialchars($description['display'] ?? '', ENT_QUOTES, 'UTF-8') . '</footer>':'')
                     . '</div></div>';
         }
         return str_replace('data-name="en"','style="display:block;" data-name="en"',$content) . '</div>';
@@ -147,8 +147,8 @@ ORDER BY main DESC,sub DESC, bug DESC");
                 $content .= '<tr>'
                         . '<td><a rel="nofollow" href="addons/' . $addon['slug'] . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '</a></td>'
                         . '<td>' . self::$status['stability'][$item['status']] . '</td>'
-                        . '<td style="max-height:3em;overflow-y:scroll;">' . $item['change'] . '</td>'
-                        . '<td>' . $item['display'] . '</td>'
+                        . '<td style="max-height:3em;overflow-y:scroll;">' . htmlspecialchars($item['change'], ENT_QUOTES, 'UTF-8') . '</td>'
+                        . '<td>' . htmlspecialchars($item['display'], ENT_QUOTES, 'UTF-8') . '</td>'
                         . '<td style="max-height:3em;overflow-y:scroll;">' . $item['downloads'] . '</td>'
                         . '</tr>';
             }
@@ -315,7 +315,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
             while($item = $res->fetch_assoc()) {
                 $content .= '<div id="comment-' . $item['id'] . '">'
                         . '<div class="comment-user">'
-                        . '<strong><a href="/account/' . $item['slug'] . '/">' . $item['display'] . '</a></strong>'
+                        . '<strong><a href="/account/' . $item['slug'] . '/">' . htmlspecialchars($item['display'], ENT_QUOTES, 'UTF-8') . '</a></strong>'
                         . '<p>' . date('r',$item['tstamp']) . '</p>'
                         . '<a href="/addons/' . $GLOBALS['parser']->getPage(1) . '#comment-' . $item['id'] . '">Direct Link</a>'
                         . '</div>'
