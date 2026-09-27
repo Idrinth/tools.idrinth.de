@@ -527,15 +527,82 @@ ORDER BY lastUpdate DESC,name ASC";
         if(!$this->user->isActive()) {
             return 'Sorry, you need to have an active account.';
         }
-        if(isset($_POST['name'])) {
-            $this->db->query("INSERT INTO addon (name,slug) VALUES ('" . $this->db->real_escape_string($_POST['name']) . "','" . strtolower(preg_replace('/[^A-Za-z0-9_\-]+/','-',$_POST['name'])) . "')");
-            header('Location: /addons/' . strtolower(preg_replace('/[^A-Za-z0-9_\-]+/','-',$_POST['name'])) . '/upload/',302);
-            exit;
+        $error = '';
+        $name = trim($_POST['name'] ?? '');
+        $main = $_POST['main'] ?? '';
+        $sub = $_POST['sub'] ?? '';
+        $bug = $_POST['bug'] ?? '';
+        $status = $_POST['status'] ?? '';
+        $change = $_POST['change'] ?? '';
+        if(isset($_POST['submit'])) {
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9_\-]+/','-',$name), '-'));
+            $file = $_FILES['data'] ?? null;
+            $validFile = $file && $file['error'] === UPLOAD_ERR_OK && is_uploaded_file($file['tmp_name'])
+                    && filesize($file['tmp_name']) > 0 && strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) === 'zip';
+            if($name === '' || $slug === '' || !ctype_digit((string)$main) || !ctype_digit((string)$sub)
+                    || !ctype_digit((string)$bug) || !in_array((string)$status, array('0','1','2'), true) || !$validFile) {
+                $error = 'Please enter a name and valid version details, and select a ZIP file to upload.';
+            } else {
+                try {
+                    $created = $this->db->query("INSERT INTO addon (name,slug,active,curVersion,lastUpdate) VALUES ('" . $this->db->real_escape_string($name) . "','" . $this->db->real_escape_string($slug) . "',0,'',0)");
+                } catch (mysqli_sql_exception $exception) {
+                    $created = false;
+                }
+                if(!$created) {
+                    $error = 'The addon could not be created. Check whether its name or URL is already in use.';
+                } else {
+                    $this->id = $this->db->insert_id;
+                    $data = file_get_contents($file['tmp_name']);
+                    $versionMain = intval($main);
+                    $versionSub = intval($sub);
+                    $versionBug = intval($bug);
+                    $versionStatus = intval($status);
+                    $author = intval($this->user->id);
+                    $timestamp = time();
+                    $ip = $_SERVER['REMOTE_ADDR'];
+                    $blob = null;
+                    $statement = false;
+                    $versionId = 0;
+                    try {
+                        $statement = $data !== false ? $this->db->prepare("INSERT INTO version (main,sub,bug,addon,author,`status`,`change`,ip,tstamp,`data`,disabled) VALUES (?,?,?,?,?,?,?,?,?,?,0)") : false;
+                        $saved = $statement && $statement->bind_param('iiiiiissib', $versionMain, $versionSub, $versionBug, $this->id, $author, $versionStatus, $change, $ip, $timestamp, $blob)
+                                && $statement->send_long_data(9, $data) && $statement->execute();
+                        if($saved) {
+                            $versionId = $this->db->insert_id;
+                            $activated = $this->db->query("UPDATE addon SET active=1,curVersion='" . intval($main) . '.' . intval($sub) . '.' . intval($bug)
+                                    . "',lastUpdate=" . time() . " WHERE id=" . $this->id);
+                            if($activated) {
+                                header('Location: /addons/' . $slug . '/',302);
+                                exit;
+                            }
+                        }
+                    } catch (mysqli_sql_exception $exception) {
+                        $saved = false;
+                    } finally {
+                        if($statement) {
+                            $statement->close();
+                        }
+                    }
+                    if($versionId) {
+                        $this->db->query("DELETE FROM version WHERE id=" . $versionId);
+                    }
+                    $this->db->query("DELETE FROM addon WHERE id=" . $this->id . " AND active=0");
+                    $error = 'The addon could not be saved. Please check the ZIP file and try again.';
+                }
+            }
         }
-        $content = '<form method="post">';
+        $content = $error ? '<p class="error">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>' : '';
+        $content .= '<p>The addon page is created only after its first version has been uploaded successfully.</p>';
+        $content .= '<form method="post" enctype="multipart/form-data">';
         $content .= '<fieldset><legend>Basic Data</legend>';
-        $content .= '<div><label for="name">Name</label><input type="text" required="required" value="" name="name" id="name"/></div>';
-        $content .= '</fieldset><button type="submit">Create Addon</button><div></form></div>';
+        $content .= '<div><label for="name">Name</label><input type="text" required="required" value="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" name="name" id="name"/></div>';
+        $content .= '<div><label for="data">First version ZIP file</label><input accept="application/zip,.zip" required type="file" name="data" id="data"></div>';
+        $content .= '<div><label for="main">Main-Version:</label><input required type="number" min="0" name="main" id="main" value="' . htmlspecialchars((string)$main, ENT_QUOTES, 'UTF-8') . '"></div>';
+        $content .= '<div><label for="sub">Sub-Version:</label><input required type="number" min="0" name="sub" id="sub" value="' . htmlspecialchars((string)$sub, ENT_QUOTES, 'UTF-8') . '"></div>';
+        $content .= '<div><label for="bug">Bug-version:</label><input required type="number" min="0" name="bug" id="bug" value="' . htmlspecialchars((string)$bug, ENT_QUOTES, 'UTF-8') . '"></div>';
+        $content .= '<div><label for="status">Status:</label><select id="status" name="status"><option value="0"' . ((string)$status === '0' ? ' selected' : '') . '>Alpha</option><option value="1"' . ((string)$status === '1' ? ' selected' : '') . '>Beta</option><option value="2"' . ((string)$status === '2' ? ' selected' : '') . '>Stable</option></select></div>';
+        $content .= '<div><label for="change">Changes:</label><textarea name="change" id="change">' . htmlspecialchars($change, ENT_QUOTES, 'UTF-8') . '</textarea></div>';
+        $content .= '</fieldset><button type="submit" name="submit" value="1">Create Addon</button></form>';
         return $content;
     }
 }
