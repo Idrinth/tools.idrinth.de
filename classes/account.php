@@ -115,7 +115,7 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
                 . '<fieldset><legend>Your Data</legend>'
                 . '<div class="wrapper">'
                 . '<label for="user">Login</label>'
-                . '<input type="password" name="user" id="user" value=""/>'
+                . '<input type="text" name="user" id="user" value=""/>'
                 . '</div>'
                 . '<div class="wrapper">'
                 . '<label for="pw">Password</label>'
