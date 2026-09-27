@@ -272,11 +272,11 @@ WHERE `user`.email='" . $this->db->real_escape_string($_POST['email']) . "'");
         $content = '';
         $display = htmlspecialchars($user['display'], ENT_QUOTES, 'UTF-8');
         if($own) {
-            if(isset($_POST['pw-o']) && isset($_POST['pw-o']) && $_POST['pw-o'] && $_POST['pw-o']) {
+            if(isset($_POST['pw-o'], $_POST['pw-n']) && is_string($_POST['pw-o']) && is_string($_POST['pw-n']) && $_POST['pw-o'] !== '' && $_POST['pw-n'] !== '') {
                 $this->db->query("UPDATE user "
                         . "SET pass='" . md5($this->user->id . $_POST['pw-n']) . "' "
                         . "WHERE id='" . $this->user->id . "' "
-                        . "AND pass='" . md5($this->user->id . $_POST['pw-0']) . "'");
+                        . "AND pass='" . md5($this->user->id . $_POST['pw-o']) . "'");
                 if($this->db->affected_rows == 1) {
                     setcookie('iadb',$this->user->login . '|' . sha1($this->user->display . md5($this->user->id . $_POST['pw-n'])),time() + 2592000,'/',$GLOBALS['hostname']);
                     $content .= '<p>Your password was changed.</p>';
