@@ -483,6 +483,18 @@ ORDER BY lastUpdate DESC,name ASC";
         </form>
         '. $content;
     }
+    function blockedZipEntryExtensions() {
+        return array('exe', 'bat', 'cmd', 'com', 'scr', 'pif', 'msi', 'vbs', 'js', 'jar', 'dll', 'ps1', 'sh');
+    }
+    function zipEntryHasBlockedExtension($name) {
+        $base = strtolower(basename(str_replace('\\', '/', (string)$name)));
+        $base = rtrim($base, " .\t");
+        if($base === '' || strpos($base, '.') === false) {
+            return false;
+        }
+        $ext = pathinfo($base, PATHINFO_EXTENSION);
+        return in_array($ext, $this->blockedZipEntryExtensions(), true);
+    }
     function isZipUpload($file) {
         if(!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name']) || filesize($file['tmp_name']) <= 0) {
             return false;
@@ -499,14 +511,26 @@ ORDER BY lastUpdate DESC,name ASC";
         if($magic !== "PK\x03\x04" && $magic !== "PK\x05\x06" && $magic !== "PK\x07\x08") {
             return false;
         }
-        if(class_exists('ZipArchive')) {
-            $zip = new ZipArchive();
-            $opened = $zip->open($file['tmp_name']);
-            if($opened !== true) {
+        if(!class_exists('ZipArchive')) {
+            return false;
+        }
+        $zip = new ZipArchive();
+        $opened = $zip->open($file['tmp_name']);
+        if($opened !== true) {
+            return false;
+        }
+        for($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            if(!$stat || empty($stat['name'])) {
+                $zip->close();
                 return false;
             }
-            $zip->close();
+            if($this->zipEntryHasBlockedExtension($stat['name'])) {
+                $zip->close();
+                return false;
+            }
         }
+        $zip->close();
         return true;
     }
     function uploadFile($addon) {
@@ -516,7 +540,7 @@ ORDER BY lastUpdate DESC,name ASC";
         $error = '';
         if(isset($_POST['main']) && isset($_POST['sub']) && isset($_POST['bug']) && isset($_POST['status']) && isset($_FILES['data'])) {
             if(!$this->isZipUpload($_FILES['data'])) {
-                $error = 'Please select a valid ZIP file to upload.';
+                $error = 'Please select a valid ZIP file to upload. Archives may not contain executable or script files (.exe, .bat, .cmd, .com, .scr, .pif, .msi, .vbs, .js, .jar, .dll, .ps1, .sh).';
             } else {
                 $this->db->query("INSERT INTO version (main,sub,bug,addon,author,`status`,`change`,ip,tstamp,`data`,disabled) VALUES ("
                         . intval($_POST['main']) . ","
@@ -572,7 +596,7 @@ ORDER BY lastUpdate DESC,name ASC";
             $validFile = $this->isZipUpload($file);
             if($name === '' || $slug === '' || !ctype_digit((string)$main) || !ctype_digit((string)$sub)
                     || !ctype_digit((string)$bug) || !in_array((string)$status, array('0','1','2'), true) || !$validFile) {
-                $error = 'Please enter a name and valid version details, and select a ZIP file to upload.';
+                $error = 'Please enter a name and valid version details, and select a ZIP file to upload. Archives may not contain executable or script files (.exe, .bat, .cmd, .com, .scr, .pif, .msi, .vbs, .js, .jar, .dll, .ps1, .sh).';
             } else {
                 try {
                     $created = $this->db->query("INSERT INTO addon (name,slug,active,curVersion,lastUpdate) VALUES ('" . $this->db->real_escape_string($name) . "','" . $this->db->real_escape_string($slug) . "',0,'',0)");
