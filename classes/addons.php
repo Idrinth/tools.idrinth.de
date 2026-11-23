@@ -209,7 +209,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
             return 'Version not found';
         }
         $versionId = intval($versionId);
-        $res = $this->db->query("SELECT id,main,sub,bug,`status`,author FROM version WHERE id=" . $versionId . " AND addon=" . intval($this->id) . " LIMIT 1");
+        $res = $this->db->query("SELECT id,main,sub,bug,`status`,`change`,author FROM version WHERE id=" . $versionId . " AND addon=" . intval($this->id) . " LIMIT 1");
         if(!$res || !$res->num_rows) {
             return 'Version not found';
         }
@@ -219,19 +219,21 @@ ORDER BY main DESC,sub DESC, bug DESC");
             return 'No Access';
         }
         $status = (string)$version['status'];
+        $change = (string)$version['change'];
         $error = '';
         if(isset($_POST['save_status'])) {
-            if(!isset($_POST['status']) || !in_array($_POST['status'], array('0','1','2'), true)) {
-                $error = 'Please choose a valid release status.';
+            if(!isset($_POST['status']) || !in_array($_POST['status'], array('0','1','2'), true) || !isset($_POST['change']) || !is_string($_POST['change'])) {
+                $error = 'Please choose a valid release status and enter valid change notes.';
             } else {
                 $status = $_POST['status'];
+                $change = $_POST['change'];
                 $authorFilter = $this->user->admin ? '' : ' AND author=' . intval($this->user->id);
-                $saved = $this->db->query("UPDATE version SET `status`=" . intval($status) . " WHERE id=" . $versionId . " AND addon=" . intval($this->id) . $authorFilter);
+                $saved = $this->db->query("UPDATE version SET `status`=" . intval($status) . ",`change`='" . $this->db->real_escape_string($change) . "' WHERE id=" . $versionId . " AND addon=" . intval($this->id) . $authorFilter);
                 if($saved) {
                     header('Location: /addons/' . $addon['slug'] . '/',302);
                     exit;
                 }
-                $error = 'The release status could not be saved. Please try again.';
+                $error = 'The release details could not be saved. Please try again.';
             }
         }
         $versionName = intval($version['main']) . '.' . intval($version['sub']) . '.' . intval($version['bug']);
@@ -242,6 +244,7 @@ ORDER BY main DESC,sub DESC, bug DESC");
         return ($error ? '<p class="error">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>' : '')
                 . '<form method="post"><fieldset><legend>Edit version ' . $versionName . '</legend>'
                 . '<div><label for="status">Release status</label><select id="status" name="status">' . $options . '</select></div>'
+                . '<div><label for="change">Change notes</label><textarea id="change" name="change" rows="6">' . htmlspecialchars($change, ENT_QUOTES, 'UTF-8') . '</textarea></div>'
                 . '<button type="submit" name="save_status" value="1">Save</button> '
                 . '<a href="/addons/' . htmlspecialchars($addon['slug'], ENT_QUOTES, 'UTF-8') . '/">Cancel</a>'
                 . '</fieldset></form>';
