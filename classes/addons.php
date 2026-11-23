@@ -135,7 +135,7 @@ class addons {
             $content .= $this->getEndorseButton(($res->fetch_assoc()??[])['endorsed']??0);
         }
         $content .= '<table><thead><tr><th>Version</th><th>Status</th><th>Changes</th><th>Uploader</th><th>Downloads</th></tr></thead><tbody>';
-        $res = $this->db->query("SELECT main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(download.id) as downloads
+        $res = $this->db->query("SELECT version.id,version.author,main,sub,bug,`status`,`use`,tstamp,`change`,display, COUNT(download.id) as downloads
 FROM version
 INNER JOIN user ON user.id=version.author
 LEFT JOIN download ON download.version=version.id
@@ -144,8 +144,12 @@ GROUP BY version.id
 ORDER BY main DESC,sub DESC, bug DESC");
         if($res) {
             while($item = $res->fetch_assoc()) {
+                $versionLink = '<a rel="nofollow" href="/addons/' . htmlspecialchars($addon['slug'], ENT_QUOTES, 'UTF-8') . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '</a>';
+                if($this->user->isActive() && ($this->user->admin || intval($item['author']) === intval($this->user->id))) {
+                    $versionLink .= '<br><a href="/addons/' . htmlspecialchars($addon['slug'], ENT_QUOTES, 'UTF-8') . '/version/' . intval($item['id']) . '/edit/">Edit</a>';
+                }
                 $content .= '<tr>'
-                        . '<td><a rel="nofollow" href="addons/' . $addon['slug'] . '/download/' . $item['main'] . '-' . $item['sub'] . '-' . $item['bug'] . '/">' . $item['main'] . '.' . $item['sub'] . '.' . $item['bug'] . '</a></td>'
+                        . '<td>' . $versionLink . '</td>'
                         . '<td>' . self::$status['stability'][$item['status']] . '</td>'
                         . '<td style="max-height:3em;overflow-y:scroll;">' . htmlspecialchars($item['change'], ENT_QUOTES, 'UTF-8') . '</td>'
                         . '<td>' . htmlspecialchars($item['display'], ENT_QUOTES, 'UTF-8') . '</td>'
@@ -189,10 +193,58 @@ ORDER BY main DESC,sub DESC, bug DESC");
         if($GLOBALS['parser']->getPage(2) == 'edit') {
             return $this->editAddon($addon,$GLOBALS['parser']->getPage(3));
         }
+        if($GLOBALS['parser']->getPage(2) == 'version' && $GLOBALS['parser']->getPage(4) == 'edit') {
+            return $this->editVersion($addon,$GLOBALS['parser']->getPage(3));
+        }
         if($GLOBALS['parser']->getPage(2) == 'upload') {
             return $this->uploadFile($addon);
         }
         return $this->displayAddon($addon);
+    }
+    function editVersion($addon,$versionId) {
+        if(!$this->user->isActive()) {
+            return 'No Access without login';
+        }
+        if(!ctype_digit((string)$versionId) || intval($versionId) < 1) {
+            return 'Version not found';
+        }
+        $versionId = intval($versionId);
+        $res = $this->db->query("SELECT id,main,sub,bug,`status`,author FROM version WHERE id=" . $versionId . " AND addon=" . intval($this->id) . " LIMIT 1");
+        if(!$res || !$res->num_rows) {
+            return 'Version not found';
+        }
+        $version = $res->fetch_assoc();
+        $res->free();
+        if(!$this->user->admin && intval($version['author']) !== intval($this->user->id)) {
+            return 'No Access';
+        }
+        $status = (string)$version['status'];
+        $error = '';
+        if(isset($_POST['save_status'])) {
+            if(!isset($_POST['status']) || !in_array($_POST['status'], array('0','1','2'), true)) {
+                $error = 'Please choose a valid release status.';
+            } else {
+                $status = $_POST['status'];
+                $authorFilter = $this->user->admin ? '' : ' AND author=' . intval($this->user->id);
+                $saved = $this->db->query("UPDATE version SET `status`=" . intval($status) . " WHERE id=" . $versionId . " AND addon=" . intval($this->id) . $authorFilter);
+                if($saved) {
+                    header('Location: /addons/' . $addon['slug'] . '/',302);
+                    exit;
+                }
+                $error = 'The release status could not be saved. Please try again.';
+            }
+        }
+        $versionName = intval($version['main']) . '.' . intval($version['sub']) . '.' . intval($version['bug']);
+        $options = '';
+        foreach(self::$status['stability'] as $value => $label) {
+            $options .= '<option value="' . $value . '"' . ((string)$value === $status ? ' selected' : '') . '>' . ucfirst($label) . '</option>';
+        }
+        return ($error ? '<p class="error">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>' : '')
+                . '<form method="post"><fieldset><legend>Edit version ' . $versionName . '</legend>'
+                . '<div><label for="status">Release status</label><select id="status" name="status">' . $options . '</select></div>'
+                . '<button type="submit" name="save_status" value="1">Save</button> '
+                . '<a href="/addons/' . htmlspecialchars($addon['slug'], ENT_QUOTES, 'UTF-8') . '/">Cancel</a>'
+                . '</fieldset></form>';
     }
     function editAddon($addon,$lang) {
         if(!$this->user->isActive()) {
